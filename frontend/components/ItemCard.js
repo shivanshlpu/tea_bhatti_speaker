@@ -20,7 +20,8 @@ const ItemCard = {
     const isFav = Favorites.isFavorite(item.id);
 
     const hasImage = !!item.image_url;
-    const imageUrl = hasImage ? encodeURI(item.image_url) : '';
+    const backendUrl = typeof AnnounceClient !== 'undefined' ? AnnounceClient.getBackendUrl() : '';
+    const imageUrl = hasImage ? `${backendUrl}${encodeURI(item.image_url)}` : '';
 
     card.innerHTML = `
       ${hasImage ? `

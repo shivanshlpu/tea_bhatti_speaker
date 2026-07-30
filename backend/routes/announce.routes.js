@@ -54,7 +54,7 @@ audioManager.onPlaybackError = (errorMessage) => {
  * Enqueue a new announcement.
  * Body: { itemId, languageCode?, priority? }
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { itemId, languageCode, priority } = req.body;
 
@@ -89,6 +89,9 @@ router.post('/', (req, res) => {
       return res.json({ success: false, error: result.error });
     }
 
+    // Synthesize audio immediately and return URL in HTTP response
+    const synthesis = await prepareSynthesisAsync(text, lang);
+
     res.json({
       success: true,
       data: {
@@ -96,6 +99,8 @@ router.post('/', (req, res) => {
         historyId: result.historyId,
         text,
         languageCode: lang,
+        synthesis,
+        webSpeechLang: getWebSpeechLang(lang),
         queueState: queueManager.getState()
       }
     });
