@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Runtime Database & Cache
+cafe-voice.db
+audio-cache/*.wav
+!audio-cache/.gitkeep
+
+# TTS Runtime Binaries & Models (Downloaded on postinstall)
+tts-runtime/piper.exe
+tts-runtime/*.dll
+tts-runtime/espeak-ng-data/
+tts-runtime/voices/*.onnx
+tts-runtime/voices/*.json
+tts-runtime/*.zip
+
+# Build / Production Output
+dist/
+build/
+*.log
+
+# Environment & OS
+.env
+.DS_Store
+Thumbs.db
