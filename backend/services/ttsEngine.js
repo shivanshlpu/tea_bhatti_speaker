@@ -5,6 +5,7 @@ import { spawn } from 'child_process';
 import https from 'https';
 import { queryOne } from '../db/connection.js';
 import { getContentHash, getCachedAudio, cacheAudio } from './audioCache.js';
+import { isMongoConnected } from '../db/mongoConnection.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
