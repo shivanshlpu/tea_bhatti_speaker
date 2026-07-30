@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#E52521">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/light.css" id="theme-light">
   <link rel="stylesheet" href="styles/dark.css" id="theme-dark" disabled>
@@ -37,6 +39,11 @@
     </div>
 
     <div class="top-bar__right">
+      <!-- PWA Web App Install Button -->
+      <button class="btn btn--secondary btn--sm pwa-install-btn" id="pwaInstallBtn" title="Install Tea Bhatti App on your phone/PC">
+        📲 Install App
+      </button>
+
       <!-- Language Selector -->
       <div class="lang-switch" id="langSwitch">
         <button class="lang-switch__btn active" data-lang="en" id="langEn">EN</button>
@@ -290,6 +297,7 @@
   <script src="scripts/favorites.js"></script>
   <script src="scripts/settingsPanel.js"></script>
   <script src="scripts/historyView.js"></script>
+  <script src="scripts/pwaInstall.js"></script>
   <script src="scripts/app.js"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@ import { initDb, closeDb } from './db/connection.js';
 import { seedDatabase } from './db/seed.js';
 import { connectMongoDB } from './db/mongoConnection.js';
 import { seedMongoDatabase } from './db/seedMongo.js';
+import { preSynthesizeAllItems } from './services/ttsEngine.js';
 
 dotenv.config();
 
@@ -108,6 +109,10 @@ async function start() {
 
   server.listen(PORT, () => {
     console.log(`🚀 Cafe Voice System running on http://localhost:${PORT}`);
+    // Run warm cache pre-synthesis in background
+    setTimeout(() => {
+      preSynthesizeAllItems().catch((err) => console.warn('Pre-synthesis note:', err.message));
+    }, 1500);
   });
 }
 

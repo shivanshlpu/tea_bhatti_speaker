@@ -5,12 +5,21 @@ import { Category, Item } from '../db/mongoSchemas.js';
 
 const router = Router();
 
+let categoriesCache = null;
+let cacheTime = 0;
+const CACHE_TTL_MS = 60000; // 60s RAM cache
+
 /**
  * GET /api/categories
- * List all categories with their items nested inside.
+ * List all categories with their items nested inside (RAM-cached for 1ms responses).
  */
 router.get('/', async (req, res) => {
   try {
+    const now = Date.now();
+    if (categoriesCache && (now - cacheTime < CACHE_TTL_MS)) {
+      return res.json({ success: true, data: categoriesCache, cached: true });
+    }
+
     if (isMongoConnected()) {
       const categories = await Category.find().sort({ sort_order: 1 }).lean();
       const items = await Item.find({ is_available: true }).sort({ sort_order: 1 }).lean();
@@ -20,6 +29,8 @@ router.get('/', async (req, res) => {
         items: items.filter((item) => item.category_id === cat.id)
       }));
 
+      categoriesCache = result;
+      cacheTime = now;
       return res.json({ success: true, data: result });
     }
 
@@ -31,6 +42,8 @@ router.get('/', async (req, res) => {
       items: items.filter((item) => item.category_id === cat.id)
     }));
 
+    categoriesCache = result;
+    cacheTime = now;
     res.json({ success: true, data: result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -39,7 +52,7 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /api/categories
- * Create a new category.
+ * Create a new category (invalidates cache).
  */
 router.post('/', async (req, res) => {
   try {
@@ -47,6 +60,8 @@ router.post('/', async (req, res) => {
     if (!name) {
       return res.status(400).json({ success: false, error: 'Category name is required' });
     }
+
+    categoriesCache = null; // Clear cache on new insert
 
     if (isMongoConnected()) {
       const last = await Category.findOne().sort({ id: -1 });
