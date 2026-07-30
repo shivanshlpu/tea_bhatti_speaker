@@ -161,7 +161,23 @@ export function synthesizeWithPiper(text, modelPath, outputPath) {
  * @param {string} languageCode - Language code
  * @returns {Promise<Object>} Synthesis metadata object
  */
-export async function prepareSynthesisAsync(text, languageCode) {
+export async function prepareSynthesisAsync(text, languageCode, itemId = null) {
+  // 0. Check for pre-recorded custom MP3 clip in frontend/audio_clips/
+  if (itemId) {
+    const staticFileName = `item_${itemId}_${languageCode}.mp3`;
+    const staticFilePath = join(__dirname, '..', '..', 'frontend', 'audio_clips', staticFileName);
+    if (existsSync(staticFilePath)) {
+      return {
+        text,
+        languageCode,
+        contentHash: `static_${itemId}_${languageCode}`,
+        audioUrl: `/audio_clips/${staticFileName}`,
+        fromCache: true,
+        mode: 'static_mp3'
+      };
+    }
+  }
+
   const voiceModel = getVoiceModel(languageCode);
   const contentHash = getContentHash(text, languageCode, voiceModel);
 

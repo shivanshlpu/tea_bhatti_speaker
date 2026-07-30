@@ -90,7 +90,7 @@ router.post('/', async (req, res) => {
     }
 
     // Pre-synthesize audio so the client can play it directly from HTTP response
-    const synthesis = await prepareSynthesisAsync(text, lang);
+    const synthesis = await prepareSynthesisAsync(text, lang, Number(itemId));
 
     res.json({
       success: true,
@@ -138,7 +138,7 @@ router.post('/repeat', async (req, res) => {
       priority: 'normal'
     });
 
-    const synthesis = await prepareSynthesisAsync(entry.text_spoken, entry.language_code);
+    const synthesis = await prepareSynthesisAsync(entry.text_spoken, entry.language_code, entry.item_id);
 
     res.json({
       success: true,
