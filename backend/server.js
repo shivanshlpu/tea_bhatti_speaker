@@ -44,6 +44,8 @@ app.use('/audio-cache', express.static(join(__dirname, '..', 'audio-cache')));
 
 // Serve food menu images and branding logo
 app.use('/menu_images', express.static(join(__dirname, '..', 'images', 'menu_images')));
+app.use('/images', express.static(join(__dirname, '..', 'images')));
+
 // --- Keep-Alive Health Check for Cron-Job.org / UptimeRobot ---
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: Math.floor(process.uptime()), timestamp: new Date().toISOString() });

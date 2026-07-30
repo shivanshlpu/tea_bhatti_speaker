@@ -1,7 +1,8 @@
-import { existsSync } from 'fs';
+import { existsSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
+import https from 'https';
 import { queryOne } from '../db/connection.js';
 import { getContentHash, getCachedAudio, cacheAudio } from './audioCache.js';
 
@@ -148,7 +149,6 @@ export async function prepareSynthesisAsync(text, languageCode) {
   // Ensure audio-cache directory exists
   const cacheDir = join(__dirname, '..', '..', 'audio-cache');
   if (!existsSync(cacheDir)) {
-    const { mkdirSync } = await import('fs');
     mkdirSync(cacheDir, { recursive: true });
   }
 
@@ -196,8 +196,7 @@ export async function prepareSynthesisAsync(text, languageCode) {
     const encodedText = encodeURIComponent(text);
     const gttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${ttsLang}&client=tw-ob`;
 
-    const { default: https } = await import('https');
-    const { writeFileSync } = await import('fs');
+    // https and writeFileSync are imported at top level
 
     const mp3Data = await new Promise((resolve, reject) => {
       const makeReq = (url) => {
