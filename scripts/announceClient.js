@@ -281,31 +281,31 @@ const AnnounceClient = {
   /**
    * Notify the server that playback has completed.
    */
-  async notifyPlaybackComplete() {
+  async sendPlaybackComplete(data) {
     try {
-      await fetch('/api/announce/playback-complete', {
+      await fetch(`${this.getBackendUrl()}/api/announce/playback-complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+        body: JSON.stringify(data)
       });
-    } catch (err) {
-      console.error('Failed to notify playback complete:', err);
+    } catch {
+      // Ignore feedback errors
     }
   },
 
   /**
-   * Notify the server that playback has failed.
-   * @param {string} error
+   * Send playback error report back to server.
+   * @param {Object} data
    */
-  async notifyPlaybackError(error) {
+  async sendPlaybackError(data) {
     try {
-      await fetch('/api/announce/playback-error', {
+      await fetch(`${this.getBackendUrl()}/api/announce/playback-error`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error })
+        body: JSON.stringify(data)
       });
-    } catch (err) {
-      console.error('Failed to notify playback error:', err);
+    } catch {
+      // Ignore feedback errors
     }
   },
 

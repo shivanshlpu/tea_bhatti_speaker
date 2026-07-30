@@ -52,7 +52,7 @@ const App = {
    */
   async loadCategories() {
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch(`${AnnounceClient.getBackendUrl()}/api/categories`);
       const result = await response.json();
 
       if (result.success) {
