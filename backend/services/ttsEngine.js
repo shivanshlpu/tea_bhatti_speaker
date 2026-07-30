@@ -64,10 +64,17 @@ export function getVoiceModel(languageCode) {
  * Get the spoken announcement phrase for an item in a given language.
  * @param {number} itemId
  * @param {string} languageCode
- * @returns {string} The text to speak
+ * @returns {Promise<string|null>} The text to speak
  */
-export function getAnnouncementText(itemId, languageCode) {
-  const item = queryOne('SELECT * FROM items WHERE id = ?', [itemId]);
+export async function getAnnouncementTextAsync(itemId, languageCode) {
+  let item;
+  if (isMongoConnected()) {
+    const { Item: MongoItem } = await import('../db/mongoSchemas.js');
+    item = await MongoItem.findOne({ id: Number(itemId) }).lean();
+  }
+  if (!item) {
+    item = queryOne('SELECT * FROM items WHERE id = ?', [Number(itemId)]);
+  }
 
   if (!item) return null;
 
@@ -91,6 +98,17 @@ export function getAnnouncementText(itemId, languageCode) {
     default:
       return `${name} is ready, please collect from the counter.`;
   }
+}
+
+export function getAnnouncementText(itemId, languageCode) {
+  const item = queryOne('SELECT * FROM items WHERE id = ?', [itemId]);
+  if (!item) return null;
+  let name = item.name_en;
+  if (languageCode === 'hi') name = item.name_hi || item.name_en;
+  if (languageCode === 'bho') name = item.name_bho || item.name_hi || item.name_en;
+  if (languageCode === 'hi') return item.name_hi ? `${item.name_hi} तैयार है, कृपया काउंटर से प्राप्त करें।` : `${name} तैयार है`;
+  if (languageCode === 'bho') return item.name_bho || `${name} तैयार बा`;
+  return `${name} is ready, please collect from the counter.`;
 }
 
 /**

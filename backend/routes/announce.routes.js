@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { queryOne } from '../db/connection.js';
 import { queueManager } from '../services/queueManager.js';
 import { audioManager } from '../services/audioManager.js';
-import { getAnnouncementText, prepareSynthesisAsync, getWebSpeechLang } from '../services/ttsEngine.js';
+import { getAnnouncementTextAsync, prepareSynthesisAsync, getWebSpeechLang } from '../services/ttsEngine.js';
 import { getLastAnnouncement } from '../services/historyService.js';
 
 const router = Router();
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
     }
 
     // Get announcement text
-    const text = getAnnouncementText(itemId, lang);
+    const text = await getAnnouncementTextAsync(itemId, lang);
     if (!text) {
       return res.status(404).json({ success: false, error: 'Item not found' });
     }

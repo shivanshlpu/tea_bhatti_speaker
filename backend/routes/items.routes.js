@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { queryAll, queryOne, runSql } from '../db/connection.js';
+import { isMongoConnected } from '../db/mongoConnection.js';
+import { Item } from '../db/mongoSchemas.js';
 
 const router = Router();
 
@@ -7,9 +9,22 @@ const router = Router();
  * GET /api/items?search=
  * List all active items, optionally filtered by search query.
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { search, category_id } = req.query;
+
+    if (isMongoConnected()) {
+      const filter = { is_available: true };
+      if (category_id) filter.category_id = Number(category_id);
+      if (search) {
+        const regex = new RegExp(search, 'i');
+        filter.$or = [{ name_en: regex }, { name_hi: regex }, { name_bho: regex }];
+      }
+
+      const items = await Item.find(filter).sort({ sort_order: 1 }).lean();
+      return res.json({ success: true, data: items });
+    }
+
     let query = 'SELECT * FROM items WHERE active = 1';
     const params = [];
 
@@ -37,75 +52,37 @@ router.get('/', (req, res) => {
  * POST /api/items
  * Create a new menu item.
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { category_id, name_en, name_hi, name_bho, is_favorite, sort_order } = req.body;
+    const { category_id, name_en, name_hi, name_bho, image_url, price, is_popular, sort_order } = req.body;
 
     if (!category_id || !name_en) {
       return res.status(400).json({ success: false, error: 'category_id and name_en are required' });
     }
 
+    if (isMongoConnected()) {
+      const last = await Item.findOne().sort({ id: -1 });
+      const nextId = (last?.id || 0) + 1;
+      const item = await Item.create({
+        id: nextId,
+        category_id: Number(category_id),
+        name_en,
+        name_hi: name_hi || '',
+        name_bho: name_bho || '',
+        price: price || 99,
+        image_url: image_url || '/images/logo.png',
+        is_popular: is_popular || false,
+        sort_order: sort_order || 0
+      });
+      return res.json({ success: true, data: { id: item.id } });
+    }
+
     const result = runSql(
-      'INSERT INTO items (category_id, name_en, name_hi, name_bho, is_favorite, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-      [category_id, name_en, name_hi || null, name_bho || null, is_favorite || 0, sort_order || 0]
+      'INSERT INTO items (category_id, name_en, name_hi, name_bho, image_url, is_favorite, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [category_id, name_en, name_hi || null, name_bho || null, image_url || null, is_popular ? 1 : 0, sort_order || 0]
     );
 
     res.json({ success: true, data: { id: result.lastInsertRowid } });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/**
- * PUT /api/items/:id
- * Update an existing item.
- */
-router.put('/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const { category_id, name_en, name_hi, name_bho, is_favorite, sort_order, active } = req.body;
-
-    const existing = queryOne('SELECT * FROM items WHERE id = ?', [Number(id)]);
-    if (!existing) {
-      return res.status(404).json({ success: false, error: 'Item not found' });
-    }
-
-    runSql(`
-      UPDATE items SET
-        category_id = COALESCE(?, category_id),
-        name_en = COALESCE(?, name_en),
-        name_hi = COALESCE(?, name_hi),
-        name_bho = COALESCE(?, name_bho),
-        is_favorite = COALESCE(?, is_favorite),
-        sort_order = COALESCE(?, sort_order),
-        active = COALESCE(?, active)
-      WHERE id = ?
-    `, [
-      category_id ?? null, name_en ?? null, name_hi ?? null, name_bho ?? null,
-      is_favorite ?? null, sort_order ?? null, active ?? null, Number(id)
-    ]);
-
-    const updated = queryOne('SELECT * FROM items WHERE id = ?', [Number(id)]);
-    res.json({ success: true, data: updated });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-/**
- * DELETE /api/items/:id
- * Soft-delete an item (sets active = 0).
- */
-router.delete('/:id', (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = runSql('UPDATE items SET active = 0 WHERE id = ?', [Number(id)]);
-
-    if (result.changes === 0) {
-      return res.status(404).json({ success: false, error: 'Item not found' });
-    }
-
-    res.json({ success: true, data: { deleted: true } });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

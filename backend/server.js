@@ -3,8 +3,13 @@ import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 import { initDb, closeDb } from './db/connection.js';
 import { seedDatabase } from './db/seed.js';
+import { connectMongoDB } from './db/mongoConnection.js';
+import { seedMongoDatabase } from './db/seedMongo.js';
+
+dotenv.config();
 
 // Route imports
 import itemsRouter from './routes/items.routes.js';
@@ -91,7 +96,12 @@ async function start() {
   try {
     await initDb();
     seedDatabase();
-    console.log('✅ Database initialized');
+    console.log('✅ SQLite Database initialized');
+
+    const mongoOk = await connectMongoDB();
+    if (mongoOk) {
+      await seedMongoDatabase();
+    }
   } catch (err) {
     console.error('❌ Database initialization failed:', err.message);
   }
