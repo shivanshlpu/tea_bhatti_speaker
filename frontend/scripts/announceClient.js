@@ -21,12 +21,27 @@ const AnnounceClient = {
   fadeMs: 150,
 
   /**
+   * Get the active backend server URL (supports local server, Render, Railway, or local IP).
+   * @returns {string}
+   */
+  getBackendUrl() {
+    const urlParam = new URLSearchParams(window.location.search).get('backend');
+    if (urlParam) {
+      localStorage.setItem('cafe_backend_url', urlParam);
+      return urlParam.replace(/\/$/, '');
+    }
+    const stored = localStorage.getItem('cafe_backend_url');
+    return stored ? stored.replace(/\/$/, '') : '';
+  },
+
+  /**
    * Initialize the announce client and Socket.IO connection.
    */
   init() {
-    // Connect to Socket.IO
+    // Connect to Socket.IO (supports remote/local backend server)
     if (typeof io !== 'undefined') {
-      this.socket = io();
+      const backendUrl = this.getBackendUrl();
+      this.socket = backendUrl ? io(backendUrl) : io();
 
       // Listen for play commands from the server
       this.socket.on('play-announcement', (data) => {
@@ -102,7 +117,7 @@ const AnnounceClient = {
     if (languageCode) body.languageCode = languageCode;
     if (priority !== 'normal') body.priority = priority;
 
-    const response = await fetch('/api/announce', {
+    const response = await fetch(`${this.getBackendUrl()}/api/announce`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -119,7 +134,7 @@ const AnnounceClient = {
   async repeat(historyId) {
     const body = historyId ? { historyId } : {};
 
-    const response = await fetch('/api/announce/repeat', {
+    const response = await fetch(`${this.getBackendUrl()}/api/announce/repeat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -137,7 +152,7 @@ const AnnounceClient = {
   async cancel(queueId, all = false) {
     const body = all ? { all: true } : { queueId };
 
-    const response = await fetch('/api/announce/cancel', {
+    const response = await fetch(`${this.getBackendUrl()}/api/announce/cancel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -153,7 +168,7 @@ const AnnounceClient = {
    * @returns {Promise<Object>}
    */
   async emergency(text, languageCode = 'en') {
-    const response = await fetch('/api/announce/emergency', {
+    const response = await fetch(`${this.getBackendUrl()}/api/announce/emergency`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, languageCode })
