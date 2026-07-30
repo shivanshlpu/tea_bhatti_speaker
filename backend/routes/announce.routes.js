@@ -114,7 +114,7 @@ router.post('/', async (req, res) => {
  * Re-queue the last spoken announcement.
  * Body: { historyId? } (optional — defaults to most recent)
  */
-router.post('/repeat', (req, res) => {
+router.post('/repeat', async (req, res) => {
   try {
     const { historyId } = req.body;
     let entry;
@@ -138,7 +138,19 @@ router.post('/repeat', (req, res) => {
       priority: 'normal'
     });
 
-    res.json({ success: true, data: { queueId: result.id, text: entry.text_spoken } });
+    const synthesis = await prepareSynthesisAsync(entry.text_spoken, entry.language_code);
+
+    res.json({
+      success: true,
+      data: {
+        queueId: result.id,
+        historyId: result.historyId,
+        text: entry.text_spoken,
+        languageCode: entry.language_code,
+        synthesis,
+        webSpeechLang: getWebSpeechLang(entry.language_code)
+      }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -164,7 +176,7 @@ router.post('/cancel', (req, res) => {
  * Emergency announcement — jumps queue, bypasses cache if custom text.
  * Body: { text, languageCode? }
  */
-router.post('/emergency', (req, res) => {
+router.post('/emergency', async (req, res) => {
   try {
     const { text, languageCode = 'en' } = req.body;
 
@@ -181,13 +193,18 @@ router.post('/emergency', (req, res) => {
       priority: 'emergency'
     });
 
+    const synthesis = await prepareSynthesisAsync(text, languageCode);
+
     res.json({
       success: true,
       data: {
         queueId: result.id,
         historyId: result.historyId,
         text,
-        priority: 'emergency'
+        languageCode,
+        priority: 'emergency',
+        synthesis,
+        webSpeechLang: getWebSpeechLang(languageCode)
       }
     });
   } catch (err) {

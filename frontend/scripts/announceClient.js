@@ -228,7 +228,11 @@ const AnnounceClient = {
       body: JSON.stringify(body)
     });
 
-    return response.json();
+    const result = await response.json();
+    if (result.success && result.data) {
+      this.enqueueAudio(result.data);
+    }
+    return result;
   },
 
   /**
@@ -238,6 +242,12 @@ const AnnounceClient = {
    * @returns {Promise<Object>}
    */
   async cancel(queueId, all = false) {
+    // Immediately stop local client playback and clear local play queue
+    if (all || !queueId) {
+      this.playQueue = [];
+      this.stopPlayback();
+    }
+
     const body = all ? { all: true } : { queueId };
 
     const response = await fetch(`${this.getBackendUrl()}/api/announce/cancel`, {
@@ -256,13 +266,21 @@ const AnnounceClient = {
    * @returns {Promise<Object>}
    */
   async emergency(text, languageCode = 'en') {
+    // Emergency clears existing queue and stops playing audio
+    this.playQueue = [];
+    this.stopPlayback();
+
     const response = await fetch(`${this.getBackendUrl()}/api/announce/emergency`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, languageCode })
     });
 
-    return response.json();
+    const result = await response.json();
+    if (result.success && result.data) {
+      this.enqueueAudio(result.data);
+    }
+    return result;
   },
 
   /**
@@ -346,17 +364,29 @@ const AnnounceClient = {
     this.synth.speak(utterance);
   },
 
-  /**
-   * Stop current playback (for emergency pre-empt).
-   * @param {number} fadeMs
-   */
   stopPlayback(fadeMs) {
     if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio = null;
+      try {
+        this.currentAudio.pause();
+        this.currentAudio = null;
+      } catch {
+        // Ignore
+      }
     }
-    this.synth.cancel();
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch {
+        // Ignore
+      }
+    }
     this.currentUtterance = null;
+
+    const queueText = document.getElementById('queueText');
+    if (queueText) {
+      queueText.textContent = 'Ready';
+      queueText.classList.remove('playing');
+    }
   },
 
   /**
