@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
       return res.json({ success: false, error: result.error });
     }
 
-    // Synthesize audio immediately and return URL in HTTP response
+    // Pre-synthesize audio so the client can play it directly from HTTP response
     const synthesis = await prepareSynthesisAsync(text, lang);
 
     res.json({
