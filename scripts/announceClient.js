@@ -119,6 +119,7 @@ const AnnounceClient = {
 
   /**
    * Announce an item by ID.
+   * Plays audio directly from the API response (no Socket.IO dependency).
    * @param {number} itemId
    * @param {string} [languageCode] - Override language (uses default if not specified)
    * @param {string} [priority='normal']
@@ -135,7 +136,28 @@ const AnnounceClient = {
       body: JSON.stringify(body)
     });
 
-    return response.json();
+    const result = await response.json();
+
+    // Play audio directly from API response (works on Vercel / cross-origin)
+    if (result.success && result.data) {
+      const data = result.data;
+      if (data.synthesis && data.synthesis.audioUrl) {
+        this.playAudioFile({
+          text: data.text,
+          languageCode: data.languageCode,
+          synthesis: data.synthesis,
+          audioConfig: { volume: this.volume }
+        });
+      } else {
+        this.playWebSpeech({
+          text: data.text,
+          languageCode: data.languageCode,
+          webSpeechLang: data.webSpeechLang || 'en-IN'
+        });
+      }
+    }
+
+    return result;
   },
 
   /**
