@@ -8,7 +8,8 @@
     "dev": "nodemon backend/server.js",
     "start": "electron .",
     "build": "electron-builder",
-    "seed": "node backend/db/seed.js"
+    "seed": "node backend/db/seed.js",
+    "postinstall": "node backend/scripts/downloadVoices.js && node backend/scripts/downloadPiperBinary.js"
   },
   "dependencies": {
     "sql.js": "1.12.0",
