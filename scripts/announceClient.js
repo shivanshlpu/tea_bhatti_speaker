@@ -31,7 +31,14 @@ const AnnounceClient = {
       return urlParam.replace(/\/$/, '');
     }
     const stored = localStorage.getItem('cafe_backend_url');
-    return stored ? stored.replace(/\/$/, '') : '';
+    if (stored) return stored.replace(/\/$/, '');
+
+    // Default to Render backend if hosted on Vercel or GitHub Pages
+    if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io')) {
+      return 'https://tea-bhatti-speaker.onrender.com';
+    }
+
+    return '';
   },
 
   /**
