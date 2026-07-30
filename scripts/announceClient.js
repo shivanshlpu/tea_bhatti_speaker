@@ -79,7 +79,12 @@ const AnnounceClient = {
       this.currentAudio = null;
     }
 
-    const audio = new Audio(data.synthesis.audioUrl);
+    let url = data.synthesis.audioUrl;
+    if (url && url.startsWith('/')) {
+      url = `${this.getBackendUrl()}${url}`;
+    }
+
+    const audio = new Audio(url);
     audio.volume = data.audioConfig?.volume ?? this.volume;
     this.currentAudio = audio;
 
