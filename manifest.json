@@ -1,0 +1,17 @@
+{
+  "short_name": "Tea Bhatti",
+  "name": "Tea Bhatti — Voice Kiosk System",
+  "description": "Voice Announcement System for Tea Bhatti Cafe Kiosk",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0A0A0A",
+  "theme_color": "#E52521",
+  "display": "standalone",
+  "orientation": "any"
+}

@@ -117,8 +117,78 @@ const AnnounceClient = {
     });
   },
 
+  playQueue: [],
+  isPlayingQueue: false,
+
+  enqueueAudio(data) {
+    this.playQueue.push(data);
+    this.processPlayQueue();
+  },
+
+  async processPlayQueue() {
+    if (this.isPlayingQueue || this.playQueue.length === 0) return;
+    this.isPlayingQueue = true;
+
+    const nextData = this.playQueue.shift();
+    try {
+      await new Promise((resolve) => {
+        if (nextData.synthesis && nextData.synthesis.audioUrl) {
+          let url = nextData.synthesis.audioUrl;
+          if (url && url.startsWith('/')) {
+            url = `${this.getBackendUrl()}${url}`;
+          }
+
+          if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+          }
+
+          const audio = new Audio(url);
+          audio.volume = nextData.audioConfig?.volume ?? this.volume;
+          this.currentAudio = audio;
+
+          const queueText = document.getElementById('queueText');
+          if (queueText) {
+            queueText.textContent = `🔊 Playing: ${nextData.text}`;
+            queueText.classList.add('playing');
+          }
+
+          audio.onended = () => {
+            this.currentAudio = null;
+            if (queueText) {
+              queueText.textContent = 'Ready';
+              queueText.classList.remove('playing');
+            }
+            resolve();
+          };
+
+          audio.onerror = () => {
+            this.currentAudio = null;
+            this.playWebSpeech(nextData);
+            setTimeout(resolve, 2000);
+          };
+
+          audio.play().catch(() => {
+            this.playWebSpeech(nextData);
+            setTimeout(resolve, 2000);
+          });
+        } else {
+          this.playWebSpeech(nextData);
+          setTimeout(resolve, 2500);
+        }
+      });
+    } catch {
+      // Continue to next queued item
+    } finally {
+      this.isPlayingQueue = false;
+      if (this.playQueue.length > 0) {
+        this.processPlayQueue();
+      }
+    }
+  },
+
   /**
-   * Announce an item by ID. Plays audio directly from HTTP response.
+   * Announce an item by ID. Plays audio directly via non-blocking FIFO queue.
    * @param {number} itemId
    * @param {string} [languageCode]
    * @param {string} [priority='normal']
@@ -137,18 +207,8 @@ const AnnounceClient = {
 
     const result = await response.json();
 
-    // Play audio directly from the HTTP response (no Socket.IO dependency)
     if (result.success && result.data) {
-      const d = result.data;
-      if (d.synthesis && d.synthesis.audioUrl) {
-        this.playAudioFile(d);
-      } else {
-        this.playWebSpeech({
-          text: d.text,
-          languageCode: d.languageCode,
-          webSpeechLang: d.webSpeechLang || 'en-IN'
-        });
-      }
+      this.enqueueAudio(result.data);
     }
 
     return result;
