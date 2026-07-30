@@ -37,7 +37,7 @@ const HistoryView = {
       const status = document.getElementById('historyFilterStatus')?.value || '';
       const language = document.getElementById('historyFilterLang')?.value || '';
 
-      let url = '/api/history?limit=50';
+      let url = `${AnnounceClient.getBackendUrl()}/api/history?limit=50`;
       if (status) url += `&status=${status}`;
       if (language) url += `&language=${language}`;
 
@@ -172,7 +172,7 @@ const HistoryView = {
     if (!confirm('Are you sure you want to clear all announcement history?')) return;
 
     try {
-      const response = await fetch('/api/history', { method: 'DELETE' });
+      const response = await fetch(`${AnnounceClient.getBackendUrl()}/api/history`, { method: 'DELETE' });
       const result = await response.json();
 
       if (result.success) {

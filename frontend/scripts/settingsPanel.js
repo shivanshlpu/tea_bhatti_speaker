@@ -17,7 +17,7 @@ const SettingsPanel = {
    */
   async loadSettings() {
     try {
-      const response = await fetch('/api/settings');
+      const response = await fetch(`${AnnounceClient.getBackendUrl()}/api/settings`);
       const result = await response.json();
 
       if (result.success) {
@@ -57,7 +57,7 @@ const SettingsPanel = {
    */
   async saveSettings(updates) {
     try {
-      await fetch('/api/settings', {
+      await fetch(`${AnnounceClient.getBackendUrl()}/api/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
