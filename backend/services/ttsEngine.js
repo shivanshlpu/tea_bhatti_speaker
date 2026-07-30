@@ -135,7 +135,7 @@ export function synthesizeWithPiper(text, modelPath, outputPath) {
 
 /**
  * Prepare a synthesis request (async).
- * Checks audio cache -> tries Piper TTS -> falls back to Web Speech API.
+ * Checks audio cache -> tries Piper TTS -> tries Google Translate TTS -> falls back to Web Speech API.
  *
  * @param {string} text - Text to synthesize
  * @param {string} languageCode - Language code
@@ -144,6 +144,13 @@ export function synthesizeWithPiper(text, modelPath, outputPath) {
 export async function prepareSynthesisAsync(text, languageCode) {
   const voiceModel = getVoiceModel(languageCode);
   const contentHash = getContentHash(text, languageCode, voiceModel);
+
+  // Ensure audio-cache directory exists
+  const cacheDir = join(__dirname, '..', '..', 'audio-cache');
+  if (!existsSync(cacheDir)) {
+    const { mkdirSync } = await import('fs');
+    mkdirSync(cacheDir, { recursive: true });
+  }
 
   // 1. Check audio cache
   const cachedPath = getCachedAudio(contentHash);
@@ -165,12 +172,11 @@ export async function prepareSynthesisAsync(text, languageCode) {
   const piperExe = getPiperExecutable();
 
   if (piperExe && modelPath) {
-    const tempWavPath = join(__dirname, '..', '..', 'audio-cache', `${contentHash}.wav`);
+    const tempWavPath = join(cacheDir, `${contentHash}.wav`);
     const success = await synthesizeWithPiper(text, modelPath, tempWavPath);
 
     if (success) {
-      // Register in audio_cache database table
-      cacheAudio(contentHash, Buffer.from([])); // DB registry update
+      cacheAudio(contentHash, Buffer.from([]));
       const filename = `${contentHash}.wav`;
       return {
         text,
@@ -184,7 +190,57 @@ export async function prepareSynthesisAsync(text, languageCode) {
     }
   }
 
-  // 3. Fallback to Web Speech API
+  // 3. Cloud TTS fallback — Google Translate TTS (free, no API key needed)
+  try {
+    const ttsLang = languageCode === 'bho' ? 'hi' : languageCode;
+    const encodedText = encodeURIComponent(text);
+    const gttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${ttsLang}&client=tw-ob`;
+
+    const { default: https } = await import('https');
+    const { writeFileSync } = await import('fs');
+
+    const mp3Data = await new Promise((resolve, reject) => {
+      const makeReq = (url) => {
+        https.get(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://translate.google.com/'
+          }
+        }, (response) => {
+          if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+            return makeReq(response.headers.location);
+          }
+          if (response.statusCode !== 200) {
+            return reject(new Error(`Google TTS HTTP ${response.statusCode}`));
+          }
+          const chunks = [];
+          response.on('data', (c) => chunks.push(c));
+          response.on('end', () => resolve(Buffer.concat(chunks)));
+          response.on('error', reject);
+        }).on('error', reject);
+      };
+      makeReq(gttsUrl);
+    });
+
+    if (mp3Data && mp3Data.length > 1000) {
+      const mp3Path = join(cacheDir, `${contentHash}.mp3`);
+      writeFileSync(mp3Path, mp3Data);
+      cacheAudio(contentHash, Buffer.from([]));
+      return {
+        text,
+        languageCode,
+        voiceModel,
+        contentHash,
+        audioUrl: `/audio-cache/${contentHash}.mp3`,
+        fromCache: false,
+        mode: 'google-tts'
+      };
+    }
+  } catch (gttsErr) {
+    console.warn('Google TTS fallback failed:', gttsErr.message);
+  }
+
+  // 4. Final fallback to Web Speech API (browser-side)
   return {
     text,
     languageCode,
