@@ -1,0 +1,27 @@
+/* =============================================
+   DARK THEME — Cafe Voice System
+   Warm-dark palette, easy on eyes in low-light kitchen
+   ============================================= */
+
+[data-theme="dark"] {
+  --bg-primary: #1A1410;
+  --bg-card: #2B2320;
+  --accent-primary: #FF7A3D;
+  --accent-success: #4EAE76;
+  --accent-emergency: #E24C4C;
+  --text-primary: #F5EFE8;
+  --text-secondary: #B5AA9E;
+  --border: #3A322C;
+
+  /* Extended palette for gradients and subtle effects */
+  --bg-hover: #332B24;
+  --accent-primary-light: rgba(255, 122, 61, 0.12);
+  --accent-success-light: rgba(78, 174, 118, 0.12);
+  --accent-emergency-light: rgba(226, 76, 76, 0.12);
+
+  /* Shadows with warm-dark tint */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.35), 0 8px 16px rgba(0, 0, 0, 0.25);
+}

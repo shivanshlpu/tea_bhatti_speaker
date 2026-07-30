@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Cafe Voice Announcement System — tap to announce menu items over speakers">
+  <title>Tea Bhatti — Voice Announcement System</title>
+
+  <!-- Google Fonts: Inter for modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/light.css" id="theme-light">
+  <link rel="stylesheet" href="styles/dark.css" id="theme-dark" disabled>
+
+  <!-- Socket.IO client -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- ===== TOP NAVIGATION BAR ===== -->
+  <header class="top-bar" id="topBar">
+    <div class="top-bar__left">
+      <img class="top-bar__logo-img" src="/images/logo.png" alt="Tea Bhatti Logo">
+    </div>
+
+    <div class="top-bar__center">
+      <div class="search-bar" id="searchBar">
+        <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-bar__input" id="searchInput" placeholder="Search items..." autocomplete="off">
+        <button class="search-bar__clear" id="searchClear" aria-label="Clear search">✕</button>
+      </div>
+    </div>
+
+    <div class="top-bar__right">
+      <!-- Language Selector -->
+      <div class="lang-switch" id="langSwitch">
+        <button class="lang-switch__btn active" data-lang="en" id="langEn">EN</button>
+        <button class="lang-switch__btn" data-lang="hi" id="langHi">हि</button>
+        <button class="lang-switch__btn" data-lang="bho" id="langBho">भो</button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-screen="main" id="navMain" aria-label="Main Grid">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z"/></svg>
+        </button>
+        <button class="nav-tab" data-screen="history" id="navHistory" aria-label="History">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        </button>
+        <button class="nav-tab" data-screen="emergency" id="navEmergency" aria-label="Emergency">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+        </button>
+        <button class="nav-tab" data-screen="settings" id="navSettings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT AREA ===== -->
+  <main class="content" id="content">
+
+    <!-- ===== SCREEN: MAIN GRID ===== -->
+    <section class="screen active" id="screenMain">
+      <!-- Favorites Row -->
+      <div class="favorites-row" id="favoritesRow">
+        <h2 class="section-label">⭐ Favorites</h2>
+        <div class="favorites-grid" id="favoritesGrid"></div>
+      </div>
+
+      <!-- Category Tabs -->
+      <div class="category-tabs-wrapper" id="categoryTabsWrapper">
+        <div class="category-tabs" id="categoryTabs"></div>
+      </div>
+
+      <!-- Items Grid -->
+      <div class="items-grid" id="itemsGrid"></div>
+
+      <!-- Queue Status Bar -->
+      <div class="queue-bar" id="queueBar">
+        <div class="queue-bar__status" id="queueStatus">
+          <span class="queue-bar__icon">🔊</span>
+          <span class="queue-bar__text" id="queueText">Ready</span>
+        </div>
+        <div class="queue-bar__actions">
+          <button class="queue-bar__btn" id="repeatBtn" aria-label="Repeat last">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+            Repeat
+          </button>
+          <button class="queue-bar__btn queue-bar__btn--cancel" id="cancelAllBtn" aria-label="Cancel all">
+            ✕ Clear Queue
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SCREEN: HISTORY ===== -->
+    <section class="screen" id="screenHistory">
+      <div class="screen-header">
+        <h2 class="screen-header__title">Announcement History</h2>
+        <div class="screen-header__actions">
+          <select class="filter-select" id="historyFilterStatus">
+            <option value="">All Status</option>
+            <option value="played">Played</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select class="filter-select" id="historyFilterLang">
+            <option value="">All Languages</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="bho">Bhojpuri</option>
+          </select>
+          <button class="btn btn--ghost" id="clearHistoryBtn">🗑️ Clear All</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+      <div class="history-empty" id="historyEmpty" style="display:none;">
+        <span class="history-empty__icon">📋</span>
+        <p>No announcements yet</p>
+      </div>
+    </section>
+
+    <!-- ===== SCREEN: EMERGENCY ===== -->
+    <section class="screen" id="screenEmergency">
+      <div class="emergency-panel">
+        <div class="emergency-panel__header">
+          <span class="emergency-panel__icon">⚠️</span>
+          <h2 class="emergency-panel__title">Emergency Announcement</h2>
+          <p class="emergency-panel__subtitle">This will interrupt any currently playing announcement</p>
+        </div>
+
+        <!-- Preset Emergency Phrases -->
+        <div class="emergency-presets" id="emergencyPresets">
+          <h3 class="section-label">Quick Presets</h3>
+          <div class="emergency-presets__grid">
+            <button class="emergency-preset-btn" data-text="Attention please! Emergency announcement." data-lang="en">
+              🚨 General Alert (EN)
+            </button>
+            <button class="emergency-preset-btn" data-text="ध्यान दें! आपातकालीन सूचना।" data-lang="hi">
+              🚨 General Alert (हि)
+            </button>
+            <button class="emergency-preset-btn" data-text="Kitchen is closing in 5 minutes." data-lang="en">
+              🕐 Kitchen Closing (EN)
+            </button>
+            <button class="emergency-preset-btn" data-text="रसोई 5 मिनट में बंद हो रही है।" data-lang="hi">
+              🕐 Kitchen Closing (हि)
+            </button>
+            <button class="emergency-preset-btn" data-text="Please clear the counter area." data-lang="en">
+              🧹 Clear Counter (EN)
+            </button>
+            <button class="emergency-preset-btn" data-text="All staff to the front, please." data-lang="en">
+              👥 Staff Call (EN)
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Emergency Text -->
+        <div class="emergency-custom">
+          <h3 class="section-label">Custom Message</h3>
+          <div class="emergency-custom__form">
+            <textarea class="emergency-textarea" id="emergencyText" placeholder="Type your emergency message here..." rows="3"></textarea>
+            <div class="emergency-custom__row">
+              <select class="filter-select" id="emergencyLang">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="bho">Bhojpuri</option>
+              </select>
+              <button class="btn btn--emergency" id="emergencySendBtn">
+                🔊 Announce Emergency
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SCREEN: SETTINGS ===== -->
+    <section class="screen" id="screenSettings">
+      <div class="settings-panel">
+        <h2 class="screen-header__title">Settings</h2>
+
+        <div class="settings-group">
+          <h3 class="settings-group__title">Appearance</h3>
+          <div class="setting-row">
+            <span class="setting-row__label">Theme</span>
+            <div class="theme-toggle" id="themeToggle">
+              <button class="theme-toggle__btn active" data-theme="light" id="themeLight">☀️ Light</button>
+              <button class="theme-toggle__btn" data-theme="dark" id="themeDark">🌙 Dark</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group__title">Audio</h3>
+          <div class="setting-row">
+            <span class="setting-row__label">Volume</span>
+            <div class="setting-row__control">
+              <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="90">
+              <span class="volume-value" id="volumeValue">90%</span>
+            </div>
+          </div>
+          <div class="setting-row">
+            <span class="setting-row__label">Default Language</span>
+            <select class="filter-select" id="settingsDefaultLang">
+              <option value="en">English</option>
+              <option value="hi">Hindi (हिन्दी)</option>
+              <option value="bho">Bhojpuri (भोजपुरी)</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <span class="setting-row__label">Speaker Device</span>
+            <select class="filter-select" id="settingsSpeakerDevice">
+              <option value="default">System Default</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group__title">Cache</h3>
+          <div class="setting-row">
+            <span class="setting-row__label">Audio Cache</span>
+            <div class="setting-row__control">
+              <span class="cache-info" id="cacheInfo">0 cached files</span>
+              <button class="btn btn--ghost" id="clearCacheBtn">🗑️ Clear Cache</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="settings-group__title">About</h3>
+          <div class="setting-row">
+            <span class="setting-row__label">Version</span>
+            <span class="setting-row__value">1.0.0</span>
+          </div>
+          <div class="setting-row">
+            <span class="setting-row__label">TTS Engine</span>
+            <span class="setting-row__value" id="ttsEngineInfo">Web Speech API</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== CONFIRMATION MODAL ===== -->
+  <div class="modal-overlay" id="confirmModal" style="display:none;">
+    <div class="modal">
+      <p class="modal__message" id="confirmMessage"></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="confirmCancel">Cancel</button>
+        <button class="btn btn--primary" id="confirmOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM NAVIGATION BAR ===== -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="mobile-nav-item active" data-screen="main">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z"/></svg>
+      <span>Menu</span>
+    </button>
+    <button class="mobile-nav-item" data-screen="history">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      <span>History</span>
+    </button>
+    <button class="mobile-nav-item" data-screen="emergency">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      <span>Emergency</span>
+    </button>
+    <button class="mobile-nav-item" data-screen="settings">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.611 3.611 0 0112 15.6z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="components/Toast.js"></script>
+  <script src="components/ItemCard.js"></script>
+  <script src="components/CategoryTabs.js"></script>
+  <script src="scripts/announceClient.js"></script>
+  <script src="scripts/search.js"></script>
+  <script src="scripts/favorites.js"></script>
+  <script src="scripts/settingsPanel.js"></script>
+  <script src="scripts/historyView.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>
