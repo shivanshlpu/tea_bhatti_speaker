@@ -50,31 +50,41 @@ const App = {
   /**
    * Load categories and items from the API.
    */
-  async loadCategories() {
-    try {
-      const response = await fetch(`${AnnounceClient.getBackendUrl()}/api/categories`);
-      const result = await response.json();
+  async loadCategories(retries = 4) {
+    const backendUrl = AnnounceClient.getBackendUrl();
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const response = await fetch(`${backendUrl}/api/categories`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
 
-      if (result.success) {
-        this.categories = result.data;
-        this.allItems = [];
-        this.categoryIcons = {};
+        if (result.success) {
+          this.categories = result.data;
+          this.allItems = [];
+          this.categoryIcons = {};
 
-        this.categories.forEach((cat) => {
-          this.categoryIcons[cat.id] = cat.icon || '🍽️';
-          if (cat.items) {
-            this.allItems.push(...cat.items);
-          }
-        });
+          this.categories.forEach((cat) => {
+            this.categoryIcons[cat.id] = cat.icon || '🍽️';
+            if (cat.items) {
+              this.allItems.push(...cat.items);
+            }
+          });
 
-        // Render UI
-        CategoryTabs.render(this.categories);
-        this.renderFavorites();
-        this.renderItems();
+          // Render UI
+          CategoryTabs.render(this.categories);
+          this.renderFavorites();
+          this.renderItems();
+          return;
+        }
+      } catch (err) {
+        console.warn(`Attempt ${attempt}/${retries} failed to load categories:`, err);
+        if (attempt < retries) {
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+        } else {
+          console.error('Failed to load categories after retries:', err);
+          Toast.error('Server connecting... please refresh');
+        }
       }
-    } catch (err) {
-      console.error('Failed to load categories:', err);
-      Toast.error('Failed to load menu items');
     }
   },
 
