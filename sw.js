@@ -44,8 +44,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Cache static images & scripts with SWR
-  if (url.pathname.startsWith('/menu_images') || url.pathname.startsWith('/images') || event.request.destination === 'image') {
+  // Cache static images, scripts & pre-recorded audio clips with SWR
+  if (url.pathname.startsWith('/menu_images') || url.pathname.startsWith('/images') || url.pathname.startsWith('/audio_clips') || event.request.destination === 'image' || event.request.destination === 'audio') {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) => {
         return cache.match(event.request).then((cachedResponse) => {
