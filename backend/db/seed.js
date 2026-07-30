@@ -90,10 +90,12 @@ export function seedDatabase() {
   insertItem(33, 7, 'Cheese Butter Vadapav',     'चीज़ बटर वड़ा पाव',              'चीज़ बटर वड़ा पाव तैयार बा, ... गरम बा!', '/menu_images/Cheese Butter Vadapav.webp', 0, 2);
   insertItem(34, 7, 'Tandoori Vadapav',          'तंदूरी वड़ा पाव',                'तंदूरी वड़ा पाव तैयार बा, ... स्वाद इंतजार करत बा!', '/menu_images/Tandoori Vadapav.webp', 0, 3);
 
-  // 8. COMBOS (category 8)
+  // 8. COMBOS & BEVERAGES (category 8)
   insertItem(35, 8, 'Combo 1: Peppy Pizza + Corn Sandwich + 2 Coffees',  'कॉम्बो 1 पिज्जा सैंडविच और कॉफी', 'कॉम्बो 1 पिज्जा सैंडविच और कॉफी तैयार बा, ... जल्दी ले जाईं!', '/menu_images/1 Ch. Peppy Paneer Pizza + 1 Ch. Corn Sandwich + 2 Cold Coffe.webp', 1, 1);
   insertItem(36, 8, 'Combo 2: 2 King Burgers + Cheese Fries + 2 Shakes',  'कॉम्बो 2 बर्गर फ्राइज़ और शेक',   'कॉम्बो 2 किंग बर्गर फ्राइज़ और शेक तैयार बा, ... राजा स्टाइल में लीं!', '/menu_images/2 King Burger + 1 Ch. Fries + 2 Oreo Shake.webp', 0, 2);
   insertItem(37, 8, 'Combo 3: Tandoori & Veg Pizza + 2 Cold Coffees',     'कॉम्बो 3 पिज्जा और कोल्ड कॉफी',   'कॉम्बो 3 तंदूरी वेज पिज्जा और कोल्ड कॉफी तैयार बा!', '/menu_images/1 Tandoori Pizza + 1 Veg Paradise Pizza + 2 Cold Coffe.webp', 0, 3);
+  insertItem(38, 8, 'Cold Coffee',                'कोल्ड कॉफी',                    'कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!', '/menu_images/Cold Coffee.webp', 1, 4);
+  insertItem(39, 7, 'Bhel Puri',                  'भेल पूरी',                      'चटपटा भेल पूरी तैयार बा, ... जल्दी खाए आईं!', '/menu_images/Bhel Puri.webp', 1, 4);
 
   // --- Settings ---
   runSql('INSERT OR IGNORE INTO settings (id, theme, default_language, volume, fade_ms, repeat_cooldown_ms) VALUES (1, ?, ?, ?, ?, ?)',
