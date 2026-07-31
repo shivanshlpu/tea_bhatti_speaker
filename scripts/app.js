@@ -142,6 +142,9 @@ const App = {
       });
     }
 
+    // Sort categories by sort_order
+    this.categories.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
     this.categoryIcons = {};
     this.categories.forEach((cat) => {
       this.categoryIcons[cat.id] = cat.icon || '🍽️';
@@ -150,6 +153,12 @@ const App = {
     CategoryTabs.render(this.categories);
     this.renderFavorites();
     this.renderItems();
+
+    // Remove logo pulse animation once menu data is loaded and rendered
+    const logoContainer = document.getElementById('logoContainer');
+    if (logoContainer) {
+      logoContainer.classList.remove('is-loading');
+    }
   },
 
   /**

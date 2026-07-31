@@ -1599,3 +1599,67 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   height: 12px;
   opacity: 0.5;
 }
+
+/* =============================================
+   LOGO LOADING ANIMATION & SKELETON TABS
+   ============================================= */
+
+.top-bar__logo-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-bar__logo-container.is-loading .top-bar__logo-img {
+  animation: logoPulse 1.6s ease-in-out infinite;
+}
+
+.logo-loading-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--radius-md);
+  background: radial-gradient(circle, rgba(229, 37, 33, 0.35) 0%, rgba(229, 37, 33, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.top-bar__logo-container.is-loading .logo-loading-glow {
+  opacity: 1;
+  animation: logoGlowPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.12); }
+}
+
+@keyframes logoGlowPulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+.skeleton-tab {
+  height: 42px;
+  width: 96px;
+  border-radius: 9999px;
+  background: var(--border);
+  opacity: 0.6;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.skeleton-tab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(232, 98, 44, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: skeletonShimmer 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

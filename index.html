@@ -26,7 +26,10 @@
   <!-- ===== TOP NAVIGATION BAR ===== -->
   <header class="top-bar" id="topBar">
     <div class="top-bar__left">
-      <img class="top-bar__logo-img" src="/images/logo.png" alt="Tea Bhatti Logo">
+      <div class="top-bar__logo-container is-loading" id="logoContainer">
+        <img class="top-bar__logo-img" src="/images/logo.png" alt="Tea Bhatti Logo">
+        <span class="logo-loading-glow" id="logoLoadingGlow" title="Loading menu data..."></span>
+      </div>
     </div>
 
     <div class="top-bar__center">
@@ -83,11 +86,28 @@
 
       <!-- Category Tabs -->
       <div class="category-tabs-wrapper" id="categoryTabsWrapper">
-        <div class="category-tabs" id="categoryTabs"></div>
+        <div class="category-tabs" id="categoryTabs">
+          <div class="skeleton-tab"></div>
+          <div class="skeleton-tab"></div>
+          <div class="skeleton-tab"></div>
+          <div class="skeleton-tab"></div>
+          <div class="skeleton-tab"></div>
+        </div>
       </div>
 
-      <!-- Items Grid -->
-      <div class="items-grid" id="itemsGrid"></div>
+      <!-- Items Grid (Pre-rendered skeleton shimmer boxes) -->
+      <div class="items-grid" id="itemsGrid">
+        <div class="skeleton-grid" style="grid-column: 1/-1;">
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+          <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-text"></div><div class="skeleton-text skeleton-text--short"></div></div>
+        </div>
+      </div>
 
       <!-- Queue Status Bar -->
       <div class="queue-bar" id="queueBar">
