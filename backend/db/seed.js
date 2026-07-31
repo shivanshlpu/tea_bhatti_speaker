@@ -39,6 +39,7 @@ export function seedDatabase() {
   insertCategory(6, 'Maggie',       '🍜', 6);
   insertCategory(7, 'Vada Pav',     '🌭', 7);
   insertCategory(8, 'Combos',       '🍽️', 8);
+  insertCategory(9, 'Tea',          '🍵', 9);
 
   // --- Menu Items with Explicit Item Names & Human Punctuation Pauses ---
 
@@ -94,8 +95,12 @@ export function seedDatabase() {
   insertItem(35, 8, 'Combo 1: Peppy Pizza + Corn Sandwich + 2 Coffees',  'कॉम्बो 1 पिज्जा सैंडविच और कॉफी', 'कॉम्बो 1 पिज्जा सैंडविच और कॉफी तैयार बा, ... जल्दी ले जाईं!', '/menu_images/1 Ch. Peppy Paneer Pizza + 1 Ch. Corn Sandwich + 2 Cold Coffe.webp', 1, 1);
   insertItem(36, 8, 'Combo 2: 2 King Burgers + Cheese Fries + 2 Shakes',  'कॉम्बो 2 बर्गर फ्राइज़ और शेक',   'कॉम्बो 2 किंग बर्गर फ्राइज़ और शेक तैयार बा, ... राजा स्टाइल में लीं!', '/menu_images/2 King Burger + 1 Ch. Fries + 2 Oreo Shake.webp', 0, 2);
   insertItem(37, 8, 'Combo 3: Tandoori & Veg Pizza + 2 Cold Coffees',     'कॉम्बो 3 पिज्जा और कोल्ड कॉफी',   'कॉम्बो 3 तंदूरी वेज पिज्जा और कोल्ड कॉफी तैयार बा!', '/menu_images/1 Tandoori Pizza + 1 Veg Paradise Pizza + 2 Cold Coffe.webp', 0, 3);
-  insertItem(38, 8, 'Cold Coffee',                'कोल्ड कॉफी',                    'कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!', '/menu_images/Cold Coffee.webp', 1, 4);
   insertItem(39, 7, 'Bhel Puri',                  'भेल पूरी',                      'चटपटा भेल पूरी तैयार बा, ... जल्दी खाए आईं!', '/menu_images/Bhel Puri.webp', 1, 4);
+
+  // 9. TEA & COFFEE (category 9)
+  insertItem(38, 9, 'Cold Coffee',                'कोल्ड कॉफी',                    'कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!', '/menu_images/Cold Coffee.webp', 1, 1);
+  insertItem(40, 9, 'Hot Coffee',                 'गरम कॉफी',                      'गरम-गरम कॉफी तैयार बा, जल्दी ले जाईं!', '', 1, 2);
+  insertItem(41, 9, 'Special Tea',                'स्पेशल चाय',                    'टी भट्टी स्पेशल चाय तैयार बा, चुस्की के मजा लीं!', '', 1, 3);
 
   // --- Settings ---
   runSql('INSERT OR IGNORE INTO settings (id, theme, default_language, volume, fade_ms, repeat_cooldown_ms) VALUES (1, ?, ?, ?, ?, ?)',

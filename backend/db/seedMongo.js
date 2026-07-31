@@ -28,6 +28,7 @@ export async function seedMongoDatabase() {
       { id: 6, name: 'Maggie', icon: '🍜', sort_order: 6 },
       { id: 7, name: 'Vada Pav', icon: '🌭', sort_order: 7 },
       { id: 8, name: 'Combos', icon: '🍽️', sort_order: 8 },
+      { id: 9, name: 'Tea', icon: '🍵', sort_order: 9 },
     ];
     await Category.insertMany(categories);
 
@@ -84,8 +85,12 @@ export async function seedMongoDatabase() {
       { id: 35, category_id: 8, name_en: 'Combo 1: Peppy Pizza + Corn Sandwich + 2 Coffees', name_hi: 'कॉम्बो 1 पिज्जा सैंडविच और कॉफी', name_bho: 'कॉम्बो 1 पिज्जा सैंडविच और कॉफी तैयार बा, ... जल्दी ले जाईं!', price: 299, image_url: '/menu_images/1 Ch. Peppy Paneer Pizza + 1 Ch. Corn Sandwich + 2 Cold Coffe.webp', is_popular: true, sort_order: 1 },
       { id: 36, category_id: 8, name_en: 'Combo 2: 2 King Burgers + Cheese Fries + 2 Shakes', name_hi: 'कॉम्बो 2 बर्गर फ्राइज़ और शेक', name_bho: 'कॉम्बो 2 किंग बर्गर फ्राइज़ और शेक तैयार बा, ... राजा स्टाइल में लीं!', price: 399, image_url: '/menu_images/2 King Burger + 1 Ch. Fries + 2 Oreo Shake.webp', is_popular: false, sort_order: 2 },
       { id: 37, category_id: 8, name_en: 'Combo 3: Tandoori & Veg Pizza + 2 Cold Coffees', name_hi: 'कॉम्बो 3 पिज्जा और कोल्ड कॉफी', name_bho: 'कॉम्बो 3 तंदूरी वेज पिज्जा और कोल्ड कॉफी तैयार बा!', price: 349, image_url: '/menu_images/1 Tandoori Pizza + 1 Veg Paradise Pizza + 2 Cold Coffe.webp', is_popular: false, sort_order: 3 },
-      { id: 38, category_id: 8, name_en: 'Cold Coffee', name_hi: 'कोल्ड कॉफी', name_bho: 'कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!', price: 69, image_url: '/menu_images/Cold Coffee.webp', is_popular: true, sort_order: 4 },
       { id: 39, category_id: 7, name_en: 'Bhel Puri', name_hi: 'भेल पूरी', name_bho: 'चटपटा भेल पूरी तैयार बा, ... जल्दी खाए आईं!', price: 49, image_url: '/menu_images/Bhel Puri.webp', is_popular: true, sort_order: 4 },
+
+      // Tea & Coffee (cat 9)
+      { id: 38, category_id: 9, name_en: 'Cold Coffee', name_hi: 'कोल्ड कॉफी', name_bho: 'कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!', price: 69, image_url: '/menu_images/Cold Coffee.webp', is_popular: true, sort_order: 1 },
+      { id: 40, category_id: 9, name_en: 'Hot Coffee', name_hi: 'गरम कॉफी', name_bho: 'गरम-गरम कॉफी तैयार बा, जल्दी ले जाईं!', price: 49, image_url: '/menu_images/Hot Coffee.webp', is_popular: true, sort_order: 2 },
+      { id: 41, category_id: 9, name_en: 'Special Tea', name_hi: 'स्पेशल चाय', name_bho: 'टी भट्टी स्पेशल चाय तैयार बा, चुस्की के मजा लीं!', price: 25, image_url: '/menu_images/Special Tea.webp', is_popular: true, sort_order: 3 },
     ];
     await Item.insertMany(items);
 
