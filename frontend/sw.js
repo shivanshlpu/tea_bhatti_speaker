@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tea-bhatti-v2';
+const CACHE_NAME = 'tea-bhatti-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
