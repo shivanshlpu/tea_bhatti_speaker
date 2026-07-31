@@ -17,6 +17,12 @@ const AnnounceClient = {
   /** @type {number} Current volume (0.0–1.0) */
   volume: 0.9,
 
+  /** @type {number} Speech playback speed rate (0.5–1.5) */
+  speechRate: 0.85,
+
+  /** @type {number} Voice pitch (0.5–1.5) */
+  speechPitch: 1.0,
+
   /** @type {number} Fade duration in ms */
   fadeMs: 150,
 
@@ -145,6 +151,8 @@ const AnnounceClient = {
 
           const audio = new Audio(url);
           audio.volume = nextData.audioConfig?.volume ?? this.volume;
+          audio.playbackRate = this.speechRate;
+          audio.preservesPitch = true;
           this.currentAudio = audio;
 
           const queueText = document.getElementById('queueText');
@@ -327,8 +335,8 @@ const AnnounceClient = {
     }
 
     utterance.volume = data.audioConfig?.volume || this.volume;
-    utterance.rate = 0.92;  // Warm, unhurried human conversational cadence
-    utterance.pitch = 1.05; // Warm welcoming tone
+    utterance.rate = this.speechRate;
+    utterance.pitch = this.speechPitch;
 
     this.currentUtterance = utterance;
 
@@ -426,5 +434,24 @@ const AnnounceClient = {
    */
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol));
+  },
+
+  /**
+   * Set the speech playback speed rate.
+   * @param {number} rate - 0.5 to 1.5
+   */
+  setSpeechRate(rate) {
+    this.speechRate = Math.max(0.5, Math.min(2.0, Number(rate) || 0.85));
+    if (this.currentAudio) {
+      try { this.currentAudio.playbackRate = this.speechRate; } catch {}
+    }
+  },
+
+  /**
+   * Set the voice pitch.
+   * @param {number} pitch - 0.5 to 1.5
+   */
+  setSpeechPitch(pitch) {
+    this.speechPitch = Math.max(0.5, Math.min(2.0, Number(pitch) || 1.0));
   }
 };
