@@ -238,3 +238,31 @@ Below are all **39 Voice Announcement Scripts** translated and formatted for **E
 - **🇬🇧 English (`item_38_en.mp3`)**: `Attention please! Cold Coffee is ready at the counter.`
 - **🇮🇳 Hindi (`item_38_hi.mp3`)**: `ध्यान दें! कोल्ड कॉफी तैयार है, कृपया काउंटर से प्राप्त करें।`
 - **🌾 Bhojpuri (`item_38_bho.mp3`)**: `कोल्ड कॉफी तैयार बा, एकदम ठंढा-ठंढा बा!`
+
+---
+
+## ☕ Category 9: Tea & Coffee
+
+### Item 40: Hot Coffee (☕)
+- **🇬🇧 English (`item_40_en.mp3`)**: `Attention please! Hot Coffee is ready at the counter.`
+- **🇮🇳 Hindi (`item_40_hi.mp3`)**: `ध्यान दें! गरम कॉफी तैयार है, कृपया काउंटर से प्राप्त करें।`
+- **🌾 Bhojpuri (`item_40_bho.mp3`)**: `गरम-गरम कॉफी तैयार बा, जल्दी ले जाईं!`
+
+### Item 41: Special Tea (🍵)
+- **🇬🇧 English (`item_41_en.mp3`)**: `Attention please! Tea Bhatti Special Tea is ready at the counter.`
+- **🇮🇳 Hindi (`item_41_hi.mp3`)**: `ध्यान दें! टी भट्टी स्पेशल चाय तैयार है, कृपया काउंटर से प्राप्त करें।`
+- **🌾 Bhojpuri (`item_41_bho.mp3`)**: `टी भट्टी स्पेशल चाय तैयार बा, चुस्की के मजा लीं!`
+
+---
+
+## 🚭 Special Courtesy Announcement: Smoking Area Notice
+*(Broadcast message — NOT a food menu item)*
+
+- **🇬🇧 English (`smoking_notice_en.mp3`)**:  
+  `"Attention please! Smoking is strictly prohibited inside the main cafe area. Please proceed to the designated smoking room right next door. Thank you for your cooperation!"`
+
+- **🇮🇳 Hindi (`smoking_notice_hi.mp3`)**:  
+  `"कृपया ध्यान दें! कैफे के मुख्य एरिया में धूम्रपान मना है। कृपया बगल वाले स्मोकिंग रूम का उपयोग करें। आपके सहयोग के लिए धन्यवाद!"`
+
+- **🌾 Bhojpuri (`smoking_notice_bho.mp3`)**:  
+  `"ए जी! ध्यान दीं! इहाँ कैफे में सिगरेट पीना मना बा। सिगरेट पीए खातिर कृपया बगल वाला स्मोकिंग रूम में जाईं। धन्यवाद!"`
