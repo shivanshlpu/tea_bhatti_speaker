@@ -50,8 +50,8 @@
     },
     {
       "id": 9,
-      "name": "Tea & Coffee",
-      "icon": "☕",
+      "name": "Tea",
+      "icon": "🍵",
       "sort_order": 9
     }
   ],
