@@ -7,6 +7,8 @@ const SettingsPanel = {
   init() {
     this.bindThemeToggle();
     this.bindVolumeSlider();
+    this.bindSpeedSlider();
+    this.bindPitchSlider();
     this.bindDefaultLanguage();
     this.bindClearCache();
     this.loadSettings();
@@ -17,6 +19,26 @@ const SettingsPanel = {
    */
   async loadSettings() {
     try {
+      // Local storage overrides / fallbacks
+      const savedRate = localStorage.getItem('cafe_speech_rate') || '0.85';
+      const savedPitch = localStorage.getItem('cafe_speech_pitch') || '1.0';
+
+      const speedSlider = document.getElementById('speedSlider');
+      const speedDisplay = document.getElementById('speedValue');
+      if (speedSlider) {
+        speedSlider.value = savedRate;
+        if (speedDisplay) speedDisplay.textContent = `${savedRate}x`;
+        AnnounceClient.setSpeechRate(Number(savedRate));
+      }
+
+      const pitchSlider = document.getElementById('pitchSlider');
+      const pitchDisplay = document.getElementById('pitchValue');
+      if (pitchSlider) {
+        pitchSlider.value = savedPitch;
+        if (pitchDisplay) pitchDisplay.textContent = `${savedPitch}x`;
+        AnnounceClient.setSpeechPitch(Number(savedPitch));
+      }
+
       const response = await fetch(`${AnnounceClient.getBackendUrl()}/api/settings`);
       const result = await response.json();
 
@@ -128,6 +150,40 @@ const SettingsPanel = {
       slider.addEventListener('change', () => {
         const vol = Number(slider.value) / 100;
         this.saveSettings({ volume: vol });
+      });
+    }
+  },
+
+  /**
+   * Bind speech speed slider.
+   */
+  bindSpeedSlider() {
+    const slider = document.getElementById('speedSlider');
+    const valueDisplay = document.getElementById('speedValue');
+
+    if (slider) {
+      slider.addEventListener('input', () => {
+        const val = Number(slider.value).toFixed(2);
+        if (valueDisplay) valueDisplay.textContent = `${val}x`;
+        AnnounceClient.setSpeechRate(Number(val));
+        localStorage.setItem('cafe_speech_rate', val);
+      });
+    }
+  },
+
+  /**
+   * Bind voice pitch slider.
+   */
+  bindPitchSlider() {
+    const slider = document.getElementById('pitchSlider');
+    const valueDisplay = document.getElementById('pitchValue');
+
+    if (slider) {
+      slider.addEventListener('input', () => {
+        const val = Number(slider.value).toFixed(2);
+        if (valueDisplay) valueDisplay.textContent = `${val}x`;
+        AnnounceClient.setSpeechPitch(Number(val));
+        localStorage.setItem('cafe_speech_pitch', val);
       });
     }
   },
