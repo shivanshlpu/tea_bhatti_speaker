@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   '/scripts/settingsPanel.js',
   '/scripts/historyView.js',
   '/scripts/app.js',
+  '/data/menu.json',
   '/images/logo.png'
 ];
 

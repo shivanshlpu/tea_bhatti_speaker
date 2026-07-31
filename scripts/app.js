@@ -25,6 +25,15 @@ const App = {
   async init() {
     console.log('🚀 Cafe Voice System booting...');
 
+    // Lock orientation to portrait mode
+    if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+      try {
+        window.screen.orientation.lock('portrait').catch(() => {});
+      } catch {
+        // Ignore orientation lock rejection on unsupported desktop browsers
+      }
+    }
+
     // Initialize modules
     Toast.init();
     Search.init();
@@ -48,43 +57,85 @@ const App = {
   },
 
   /**
-   * Load categories and items from the API.
+   * Load categories and items. First loads static menu.json instantly (0.05s),
+   * then syncs with backend server in the background.
    */
-  async loadCategories(retries = 4) {
-    const backendUrl = AnnounceClient.getBackendUrl();
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const response = await fetch(`${backendUrl}/api/categories`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const result = await response.json();
-
-        if (result.success) {
-          this.categories = result.data;
-          this.allItems = [];
-          this.categoryIcons = {};
-
-          this.categories.forEach((cat) => {
-            this.categoryIcons[cat.id] = cat.icon || '🍽️';
-            if (cat.items) {
-              this.allItems.push(...cat.items);
-            }
-          });
-
-          // Render UI
-          CategoryTabs.render(this.categories);
-          this.renderFavorites();
-          this.renderItems();
-          return;
-        }
-      } catch (err) {
-        console.warn(`Attempt ${attempt}/${retries} failed to load categories:`, err);
-        if (attempt < retries) {
-          await new Promise((resolve) => setTimeout(resolve, 2500));
-        } else {
-          console.error('Failed to load categories after retries:', err);
-          Toast.error('Server connecting... please refresh');
+  async loadCategories() {
+    // 1. Instant load from local static menu.json (<50ms!)
+    try {
+      const localRes = await fetch('/data/menu.json');
+      if (localRes.ok) {
+        const localData = await localRes.json();
+        if (localData.categories && localData.items) {
+          this.applyMenuData(localData.categories, localData.items);
+          console.log('⚡ Loaded menu data instantly from local static JSON (<50ms)');
         }
       }
+    } catch (err) {
+      console.warn('Could not load local menu.json, falling back to backend API:', err);
+    }
+
+    // 2. Asynchronously sync with backend in background without blocking screen
+    this.syncBackendCategories();
+  },
+
+  /**
+   * Apply categories and items to state and render UI.
+   */
+  applyMenuData(rawCategories, flatItems = null) {
+    if (flatItems && flatItems.length > 0) {
+      const catMap = {};
+      rawCategories.forEach((cat) => {
+        catMap[cat.id] = { ...cat, items: [] };
+      });
+      flatItems.forEach((item) => {
+        if (catMap[item.category_id]) {
+          catMap[item.category_id].items.push(item);
+        }
+      });
+      this.categories = Object.values(catMap);
+      this.allItems = flatItems;
+    } else {
+      this.categories = rawCategories;
+      this.allItems = [];
+      this.categories.forEach((cat) => {
+        if (cat.items) {
+          this.allItems.push(...cat.items);
+        }
+      });
+    }
+
+    this.categoryIcons = {};
+    this.categories.forEach((cat) => {
+      this.categoryIcons[cat.id] = cat.icon || '🍽️';
+    });
+
+    CategoryTabs.render('categoryTabs', this.categories, this.activeCategory);
+    this.renderItemsGrid();
+  },
+
+  /**
+   * Sync menu updates with backend server asynchronously in background.
+   */
+  async syncBackendCategories() {
+    try {
+      const backendUrl = AnnounceClient.getBackendUrl();
+      if (!backendUrl) return;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const response = await fetch(`${backendUrl}/api/categories`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) return;
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        this.applyMenuData(result.data);
+      }
+    } catch {
+      // Fail silently and keep instant static menu data
     }
   },
 
