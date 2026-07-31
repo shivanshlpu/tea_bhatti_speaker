@@ -110,8 +110,9 @@ const App = {
       this.categoryIcons[cat.id] = cat.icon || '🍽️';
     });
 
-    CategoryTabs.render('categoryTabs', this.categories, this.activeCategory);
-    this.renderItemsGrid();
+    CategoryTabs.render(this.categories);
+    this.renderFavorites();
+    this.renderItems();
   },
 
   /**
