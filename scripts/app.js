@@ -314,6 +314,16 @@ const App = {
         // Confirmation step (Section 9: prevent mis-taps)
         if (!confirm(`Send emergency announcement?\n\n"${text}"`)) return;
 
+        const audioFile = btn.dataset.audio;
+        if (audioFile) {
+          AnnounceClient.enqueue({
+            text,
+            audioUrl: `/audio_clips/${audioFile}`
+          });
+          Toast.show('🔊 Broadcast announced!', 'info', 3000);
+          return;
+        }
+
         try {
           const result = await AnnounceClient.emergency(text, lang);
           if (result.success) {
