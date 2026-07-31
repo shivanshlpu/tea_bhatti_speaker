@@ -12,8 +12,20 @@ const PWAInstall = {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then((reg) => {
           console.log('⚡ [PWA] Service Worker registered:', reg.scope);
+          // Force SW update check on every load
+          reg.update();
         }).catch((err) => {
           console.warn('⚠️ [PWA] Service Worker registration failed:', err);
+        });
+
+        // Auto-refresh page when new Service Worker version activates
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('🔄 New app version activated! Refreshing...');
+            window.location.reload();
+          }
         });
       });
     }
