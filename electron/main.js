@@ -112,11 +112,11 @@ function createTray() {
 app.whenReady().then(() => {
   startServer();
 
-  // Give server a moment to start before loading the window
+  // Launch window almost instantly (<200ms) now that Express boots in <50ms
   setTimeout(() => {
     createWindow();
     createTray();
-  }, 1500);
+  }, 200);
 });
 
 app.on('window-all-closed', () => {

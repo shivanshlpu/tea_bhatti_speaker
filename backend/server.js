@@ -98,17 +98,21 @@ async function start() {
     await initDb();
     seedDatabase();
     console.log('✅ SQLite Database initialized');
-
-    const mongoOk = await connectMongoDB();
-    if (mongoOk) {
-      await seedMongoDatabase();
-    }
   } catch (err) {
     console.error('❌ Database initialization failed:', err.message);
   }
 
+  // Start HTTP & Socket server immediately (<50ms boot!)
   server.listen(PORT, () => {
     console.log(`🚀 Cafe Voice System running on http://localhost:${PORT}`);
+
+    // Asynchronously connect to MongoDB Atlas in background without blocking server startup
+    connectMongoDB().then(async (mongoOk) => {
+      if (mongoOk) {
+        await seedMongoDatabase().catch((err) => console.warn('Mongo seed notice:', err.message));
+      }
+    }).catch((err) => console.warn('Background MongoDB connection notice:', err.message));
+
     // Run warm cache pre-synthesis in background
     setTimeout(() => {
       preSynthesizeAllItems().catch((err) => console.warn('Pre-synthesis note:', err.message));

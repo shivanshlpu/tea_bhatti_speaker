@@ -87,18 +87,29 @@ const App = {
    * then syncs with backend server in the background.
    */
   async loadCategories() {
-    // 1. Instant load from local static menu.json (<50ms!)
-    try {
-      const localRes = await fetch('/data/menu.json');
-      if (localRes.ok) {
-        const localData = await localRes.json();
-        if (localData.categories && localData.items) {
-          this.applyMenuData(localData.categories, localData.items);
-          console.log('⚡ Loaded menu data instantly from local static JSON (<50ms)');
+    // 1. Instant load from local static menu.json (<5ms!)
+    const paths = ['./data/menu.json', '/data/menu.json', 'data/menu.json'];
+    let loaded = false;
+
+    for (const path of paths) {
+      try {
+        const localRes = await fetch(path);
+        if (localRes.ok) {
+          const localData = await localRes.json();
+          if (localData.categories && localData.items) {
+            this.applyMenuData(localData.categories, localData.items);
+            console.log('⚡ Loaded menu data instantly from local static JSON (<5ms)');
+            loaded = true;
+            break;
+          }
         }
+      } catch {
+        // Try next fallback path
       }
-    } catch (err) {
-      console.warn('Could not load local menu.json, falling back to backend API:', err);
+    }
+
+    if (!loaded) {
+      console.warn('Could not load static menu.json, syncing with backend API...');
     }
 
     // 2. Asynchronously sync with backend in background without blocking screen
