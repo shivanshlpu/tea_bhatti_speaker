@@ -53,6 +53,29 @@ const App = {
     // Bind emergency panel
     this.bindEmergencyPanel();
 
+    // Bind Top No Smoking Button
+    const topNoSmokingBtn = document.getElementById('topNoSmokingBtn');
+    if (topNoSmokingBtn) {
+      topNoSmokingBtn.addEventListener('click', () => {
+        const activeLangBtn = document.querySelector('.lang-switch__btn.active');
+        const lang = activeLangBtn?.dataset?.lang || localStorage.getItem('cafe_default_lang') || 'en';
+
+        const audioFile = `smoking_notice_${lang}.mp3`;
+        const texts = {
+          en: 'Attention please! Smoking is strictly prohibited inside the main cafe area. Please proceed to the designated smoking room right next door. Thank you!',
+          hi: 'कृपया ध्यान दें! कैफे के मुख्य एरिया में धूम्रपान मना है। कृपया बगल वाले स्मोकिंग रूम का उपयोग करें। धन्यवाद!',
+          bho: 'ए जी! ध्यान दीं! इहाँ कैफे में सिगरेट पीना मना बा। धूम्रपान खातिर कृपया बगल वाला स्मोकिंग रूम में जाईं। धन्यवाद!'
+        };
+
+        AnnounceClient.enqueue({
+          text: texts[lang] || texts.en,
+          audioUrl: `/audio_clips/${audioFile}`
+        });
+
+        Toast.show('🚭 Smoking Notice Announced!', 'info', 3000);
+      });
+    }
+
     console.log('✅ Cafe Voice System ready');
   },
 

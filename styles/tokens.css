@@ -169,6 +169,35 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   flex-shrink: 0;
 }
 
+.no-smoking-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  white-space: nowrap;
+}
+
+.no-smoking-top-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 4px 14px rgba(229, 57, 53, 0.45);
+  filter: brightness(1.05);
+}
+
+.no-smoking-top-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 4px rgba(229, 57, 53, 0.2);
+}
+
 /* =============================================
    SEARCH BAR
    ============================================= */
