@@ -1524,7 +1524,7 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
 }
 
 /* =============================================
-   SKELETON SHIMMER LOADING
+   SKELETON SHIMMER LOADING (HIGH-CONTRAST COMPONENTS)
    ============================================= */
 
 .skeleton-grid {
@@ -1536,8 +1536,8 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
 }
 
 .skeleton-card {
-  background: var(--bg-card);
-  border: 2px solid var(--border);
+  background: #F2EBE1;
+  border: 2px solid #E2D6C7;
   border-radius: var(--radius-lg);
   padding: var(--space-5) var(--space-3);
   display: flex;
@@ -1548,6 +1548,12 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   position: relative;
   overflow: hidden;
   min-height: 140px;
+  box-shadow: 0 2px 8px rgba(43, 35, 32, 0.06);
+}
+
+[data-theme="dark"] .skeleton-card {
+  background: #1E1A18;
+  border-color: #38302B;
 }
 
 .skeleton-card::after {
@@ -1558,17 +1564,17 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(232, 98, 44, 0.2) 50%,
+    rgba(232, 98, 44, 0.35) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  animation: skeletonShimmer 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: skeletonShimmer 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 [data-theme="dark"] .skeleton-card::after {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.12) 50%,
+    rgba(232, 98, 44, 0.3) 50%,
     rgba(255, 255, 255, 0) 100%
   );
 }
@@ -1582,22 +1588,34 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--border);
-  opacity: 0.6;
+  background: #E0D3C3;
+  border: 2px solid #D4C5B3;
+}
+
+[data-theme="dark"] .skeleton-icon {
+  background: #2D2723;
+  border-color: #3D3530;
 }
 
 .skeleton-text {
   width: 80%;
   height: 14px;
   border-radius: var(--radius-sm);
-  background: var(--border);
-  opacity: 0.7;
+  background: #D8CABA;
+}
+
+[data-theme="dark"] .skeleton-text {
+  background: #362E28;
 }
 
 .skeleton-text--short {
-  width: 45%;
+  width: 50%;
   height: 12px;
-  opacity: 0.5;
+  background: #E0D3C3;
+}
+
+[data-theme="dark"] .skeleton-text--short {
+  background: #2D2723;
 }
 
 /* =============================================
@@ -1611,14 +1629,14 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
 }
 
 .top-bar__logo-container.is-loading .top-bar__logo-img {
-  animation: logoPulse 1.6s ease-in-out infinite;
+  animation: logoPulse 1.4s ease-in-out infinite;
 }
 
 .logo-loading-glow {
   position: absolute;
-  inset: -6px;
+  inset: -8px;
   border-radius: var(--radius-md);
-  background: radial-gradient(circle, rgba(229, 37, 33, 0.35) 0%, rgba(229, 37, 33, 0) 70%);
+  background: radial-gradient(circle, rgba(232, 98, 44, 0.45) 0%, rgba(232, 98, 44, 0) 75%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -1626,28 +1644,33 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
 
 .top-bar__logo-container.is-loading .logo-loading-glow {
   opacity: 1;
-  animation: logoGlowPulse 1.6s ease-in-out infinite;
+  animation: logoGlowPulse 1.4s ease-in-out infinite;
 }
 
 @keyframes logoPulse {
-  0%, 100% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.05); filter: brightness(1.12); }
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(232, 98, 44, 0.4)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(232, 98, 44, 0.8)); }
 }
 
 @keyframes logoGlowPulse {
-  0%, 100% { transform: scale(0.92); opacity: 0.3; }
-  50% { transform: scale(1.15); opacity: 0.85; }
+  0%, 100% { transform: scale(0.9); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 0.9; }
 }
 
 .skeleton-tab {
   height: 42px;
   width: 96px;
   border-radius: 9999px;
-  background: var(--border);
-  opacity: 0.6;
+  background: #EAE1D6;
+  border: 1px solid #D8CBBB;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .skeleton-tab {
+  background: #26201D;
+  border-color: #38302B;
 }
 
 .skeleton-tab::after {
@@ -1658,8 +1681,8 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(232, 98, 44, 0.2) 50%,
+    rgba(232, 98, 44, 0.3) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  animation: skeletonShimmer 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: skeletonShimmer 1.1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
