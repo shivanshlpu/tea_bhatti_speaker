@@ -31,15 +31,15 @@ export function seedDatabase() {
   insertLanguage('bho', 'भोजपुरी', 'hi_IN-priyamvada-medium', 0);
 
   // --- Categories (Tea Bhatti Menu) ---
-  insertCategory(1, 'Burger',       '🍔', 1);
-  insertCategory(2, 'Sandwich',     '🥪', 2);
-  insertCategory(3, 'Pizza',        '🍕', 3);
-  insertCategory(4, 'French Fries', '🍟', 4);
-  insertCategory(5, 'Pasta',        '🍝', 5);
-  insertCategory(6, 'Maggie',       '🍜', 6);
-  insertCategory(7, 'Vada Pav',     '🌭', 7);
-  insertCategory(8, 'Combos',       '🍽️', 8);
-  insertCategory(9, 'Tea',          '🍵', 9);
+  insertCategory(9, 'Tea',          '🍵', 1);
+  insertCategory(7, 'Vada Pav',     '🌭', 2);
+  insertCategory(6, 'Maggie',       '🍜', 3);
+  insertCategory(1, 'Burger',       '🍔', 4);
+  insertCategory(2, 'Sandwich',     '🥪', 5);
+  insertCategory(3, 'Pizza',        '🍕', 6);
+  insertCategory(4, 'French Fries', '🍟', 7);
+  insertCategory(5, 'Pasta',        '🍝', 8);
+  insertCategory(8, 'Combos',       '🍽️', 9);
 
   // --- Menu Items with Explicit Item Names & Human Punctuation Pauses ---
 

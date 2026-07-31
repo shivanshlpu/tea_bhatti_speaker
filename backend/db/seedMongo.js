@@ -20,15 +20,15 @@ export async function seedMongoDatabase() {
 
     // 1. Categories
     const categories = [
-      { id: 1, name: 'Burger', icon: '🍔', sort_order: 1 },
-      { id: 2, name: 'Sandwich', icon: '🥪', sort_order: 2 },
-      { id: 3, name: 'Pizza', icon: '🍕', sort_order: 3 },
-      { id: 4, name: 'French Fries', icon: '🍟', sort_order: 4 },
-      { id: 5, name: 'Pasta', icon: '🍝', sort_order: 5 },
-      { id: 6, name: 'Maggie', icon: '🍜', sort_order: 6 },
-      { id: 7, name: 'Vada Pav', icon: '🌭', sort_order: 7 },
-      { id: 8, name: 'Combos', icon: '🍽️', sort_order: 8 },
-      { id: 9, name: 'Tea', icon: '🍵', sort_order: 9 },
+      { id: 9, name: 'Tea', icon: '🍵', sort_order: 1 },
+      { id: 7, name: 'Vada Pav', icon: '🌭', sort_order: 2 },
+      { id: 6, name: 'Maggie', icon: '🍜', sort_order: 3 },
+      { id: 1, name: 'Burger', icon: '🍔', sort_order: 4 },
+      { id: 2, name: 'Sandwich', icon: '🥪', sort_order: 5 },
+      { id: 3, name: 'Pizza', icon: '🍕', sort_order: 6 },
+      { id: 4, name: 'French Fries', icon: '🍟', sort_order: 7 },
+      { id: 5, name: 'Pasta', icon: '🍝', sort_order: 8 },
+      { id: 8, name: 'Combos', icon: '🍽️', sort_order: 9 },
     ];
     await Category.insertMany(categories);
 
