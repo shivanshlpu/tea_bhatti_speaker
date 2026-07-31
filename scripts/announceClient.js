@@ -131,7 +131,23 @@ const AnnounceClient = {
   playQueue: [],
   isPlayingQueue: false,
 
+  /**
+   * Enqueue a custom or local announcement object directly for playback.
+   * @param {Object} data - { text, audioUrl, synthesis, audioConfig }
+   */
+  enqueue(data) {
+    if (!data) return;
+    if (data.audioUrl && !data.synthesis) {
+      data.synthesis = { audioUrl: data.audioUrl };
+    }
+    this.enqueueAudio(data);
+  },
+
   enqueueAudio(data) {
+    if (!data) return;
+    if (data.audioUrl && !data.synthesis) {
+      data.synthesis = { audioUrl: data.audioUrl };
+    }
     this.playQueue.push(data);
     this.processPlayQueue();
   },
@@ -143,9 +159,13 @@ const AnnounceClient = {
     const nextData = this.playQueue.shift();
     try {
       await new Promise((resolve) => {
-        if (nextData.synthesis && nextData.synthesis.audioUrl) {
-          let url = nextData.synthesis.audioUrl;
-          if (url && url.startsWith('/')) {
+        const audioUrl = nextData.audioUrl || nextData.synthesis?.audioUrl;
+        if (audioUrl) {
+          let url = audioUrl;
+          if (url.startsWith('/audio_clips/')) {
+            // Local frontend static clip: keep relative to current origin
+            url = window.location.origin + url;
+          } else if (url.startsWith('/') && this.getBackendUrl()) {
             url = `${this.getBackendUrl()}${url}`;
           }
 
@@ -212,19 +232,31 @@ const AnnounceClient = {
     if (languageCode) body.languageCode = languageCode;
     if (priority !== 'normal') body.priority = priority;
 
-    const response = await fetch(`${this.getBackendUrl()}/api/announce`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    try {
+      const response = await fetch(`${this.getBackendUrl()}/api/announce`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (result.success && result.data) {
-      this.enqueueAudio(result.data);
+      if (result.success && result.data) {
+        this.enqueueAudio(result.data);
+      }
+
+      return result;
+    } catch (err) {
+      console.warn('Backend announce API offline, falling back to local clip:', err);
+      const activeLangBtn = document.querySelector('.lang-switch__btn.active');
+      const lang = languageCode || activeLangBtn?.dataset?.lang || 'en';
+      const audioFile = `/audio_clips/item_${itemId}_${lang}.mp3`;
+      this.enqueue({
+        text: `Item ${itemId}`,
+        audioUrl: audioFile
+      });
+      return { success: true, fallback: true };
     }
-
-    return result;
   },
 
   /**
