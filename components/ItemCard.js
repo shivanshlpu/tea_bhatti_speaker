@@ -1,7 +1,13 @@
-/**
- * ItemCard.js — Renders one tappable item card.
- * Handles the flash animation on tap and favorite toggling.
- */
+const ITEM_EMOJIS = {
+  1: '🍔', 2: '🍔', 3: '🧀🍔', 4: '🧀🍔', 5: '🔥🍔', 6: '🍔', 7: '👑🍔',
+  8: '🥪', 9: '🌽🥪', 10: '🔥🥪', 11: '🥪', 12: '🌟🥪',
+  13: '🍕', 14: '🍕', 15: '🍕', 16: '🌽🍕', 17: '🌶️🍕', 18: '🔥🍕', 19: '🥘🍕', 20: '🧀🍕',
+  21: '🍟', 22: '🌶️🍟', 23: '🧀🍟',
+  24: '🍝', 25: '🍝', 26: '🧀🍝',
+  27: '🍜', 28: '🍜', 29: '🧀🍜', 30: '🧀🍜', 31: '🔥🍜',
+  32: '🌭', 33: '🧀🌭', 34: '🔥🌭', 39: '🥣',
+  35: '🍽️', 36: '👑🍽️', 37: '🍽️', 38: '☕'
+};
 
 const ItemCard = {
   /**
@@ -19,18 +25,10 @@ const ItemCard = {
 
     const isFav = Favorites.isFavorite(item.id);
 
-    const hasImage = !!item.image_url;
-    const imageUrl = hasImage ? encodeURI(item.image_url) : '';
+    const emoji = item.emoji || ITEM_EMOJIS[item.id] || categoryIcon || '🍽️';
 
     card.innerHTML = `
-      ${hasImage ? `
-        <div class="item-card__img-container">
-          <img class="item-card__img" src="${imageUrl}" alt="${item.name_en}" loading="lazy" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='block';" />
-        </div>
-        <span class="item-card__icon" style="display:none;">${categoryIcon || '🍽️'}</span>
-      ` : `
-        <span class="item-card__icon">${categoryIcon || '🍽️'}</span>
-      `}
+      <span class="item-card__icon" style="font-size: 2.6rem; line-height: 1.2; margin-bottom: 8px; display: block;">${emoji}</span>
       <span class="item-card__name">${item.name_en}</span>
       <button class="item-card__fav ${isFav ? 'is-favorite' : ''}" 
               data-item-id="${item.id}" 
