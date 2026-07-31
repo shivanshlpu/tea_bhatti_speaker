@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="styles/light.css" id="theme-light">
   <link rel="stylesheet" href="styles/dark.css" id="theme-dark" disabled>
 
-  <!-- Socket.IO client -->
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <!-- Socket.IO client (deferred to prevent initial page render blocking) -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" defer></script>
 </head>
 <body>
   <!-- ===== TOP NAVIGATION BAR ===== -->

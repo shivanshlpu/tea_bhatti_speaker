@@ -41,19 +41,12 @@ const App = {
     SettingsPanel.init();
     HistoryView.init();
 
-    // Render skeleton shimmer animation immediately while data loads
+    // 1. Render skeleton shimmer animation immediately
     this.renderSkeletonGrid();
 
-    // Load data
-    await this.loadCategories();
-
-    // Bind navigation
+    // 2. Bind navigation & event handlers immediately (0ms UI responsiveness)
     this.bindNavigation();
-
-    // Bind queue bar actions
     this.bindQueueBar();
-
-    // Bind emergency panel
     this.bindEmergencyPanel();
 
     // Bind Top No Smoking Button
@@ -78,6 +71,13 @@ const App = {
         Toast.show('🚭 Smoking Notice Announced!', 'info', 3000);
       });
     }
+
+    // 3. Yield to main thread briefly so browser paints the skeleton UI, then load data
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        this.loadCategories();
+      }, 50);
+    });
 
     console.log('✅ Cafe Voice System ready');
   },

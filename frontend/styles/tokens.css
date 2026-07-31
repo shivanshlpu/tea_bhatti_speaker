@@ -1529,23 +1529,25 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-4);
   padding: var(--space-2) 0;
+  width: 100%;
 }
 
 .skeleton-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-4) var(--space-3);
+  padding: var(--space-5) var(--space-3);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3);
   position: relative;
   overflow: hidden;
-  min-height: 110px;
+  min-height: 140px;
 }
 
 .skeleton-card::after {
@@ -1556,21 +1558,32 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(232, 98, 44, 0.12) 50%,
+    rgba(232, 98, 44, 0.2) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  animation: skeletonShimmer 1.4s infinite;
+  animation: skeletonShimmer 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+[data-theme="dark"] .skeleton-card::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 @keyframes skeletonShimmer {
+  0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
 
 .skeleton-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--border);
+  opacity: 0.6;
 }
 
 .skeleton-text {
@@ -1578,9 +1591,11 @@ button, .item-card, .category-tab, .lang-switch__btn, .nav-tab {
   height: 14px;
   border-radius: var(--radius-sm);
   background: var(--border);
+  opacity: 0.7;
 }
 
 .skeleton-text--short {
   width: 45%;
   height: 12px;
+  opacity: 0.5;
 }
