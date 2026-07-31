@@ -47,29 +47,34 @@ const AnnounceClient = {
     return '';
   },
 
-  /**
-   * Initialize the announce client and Socket.IO connection.
-   */
   init() {
-    // Connect to Socket.IO (supports remote/local backend server)
-    if (typeof io !== 'undefined') {
-      const backendUrl = this.getBackendUrl();
-      this.socket = backendUrl ? io(backendUrl) : io();
+    // Non-blocking asynchronous Socket.IO connection in background
+    setTimeout(() => {
+      if (typeof io !== 'undefined' && !this.socket) {
+        try {
+          const backendUrl = this.getBackendUrl();
+          this.socket = backendUrl
+            ? io(backendUrl, { timeout: 4000, autoConnect: true, reconnectionAttempts: 3 })
+            : io({ timeout: 4000 });
 
-      // Listen for play commands from the server
-      this.socket.on('play-announcement', (data) => {
-        if (data.synthesis && data.synthesis.audioUrl) {
-          this.playAudioFile(data);
-        } else {
-          this.playWebSpeech(data);
+          // Listen for play commands from the server
+          this.socket.on('play-announcement', (data) => {
+            if (data.synthesis && data.synthesis.audioUrl) {
+              this.playAudioFile(data);
+            } else {
+              this.playWebSpeech(data);
+            }
+          });
+
+          // Listen for stop commands (emergency pre-empt)
+          this.socket.on('stop-playback', (data) => {
+            this.stopPlayback(data?.fadeMs || 150);
+          });
+        } catch (err) {
+          console.warn('Socket connection deferred:', err);
         }
-      });
-
-      // Listen for stop commands (emergency pre-empt)
-      this.socket.on('stop-playback', (data) => {
-        this.stopPlayback(data?.fadeMs || 150);
-      });
-    }
+      }
+    }, 100);
   },
 
   /** @type {HTMLAudioElement|null} Currently playing Audio element */

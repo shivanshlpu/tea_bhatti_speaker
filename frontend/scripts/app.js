@@ -41,6 +41,9 @@ const App = {
     SettingsPanel.init();
     HistoryView.init();
 
+    // Render skeleton shimmer animation immediately while data loads
+    this.renderSkeletonGrid();
+
     // Load data
     await this.loadCategories();
 
@@ -161,6 +164,27 @@ const App = {
     } catch {
       // Fail silently and keep instant static menu data
     }
+  },
+
+  /**
+   * Render skeleton shimmer loading grid while menu data is loading.
+   */
+  renderSkeletonGrid() {
+    const grid = document.getElementById('itemsGrid');
+    if (!grid) return;
+    grid.innerHTML = `
+      <div class="skeleton-grid" style="grid-column: 1/-1;">
+        ${Array(8)
+          .fill(`
+          <div class="skeleton-card">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text skeleton-text--short"></div>
+          </div>
+        `)
+          .join('')}
+      </div>
+    `;
   },
 
   /**
