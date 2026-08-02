@@ -127,6 +127,165 @@ const AnnounceClient = {
   playQueue: [],
   isPlayingQueue: false,
 
+  /** @type {AudioContext|null} Web Audio API context for 100% seamless 0ms merging */
+  audioCtx: null,
+  chimeBufferCache: null,
+  currentWebAudioSource: null,
+
+  getAudioContext() {
+    if (!this.audioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.audioCtx = new AudioCtx();
+      }
+    }
+    if (this.audioCtx && this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume().catch(() => {});
+    }
+    return this.audioCtx;
+  },
+
+  async loadAudioBuffer(url) {
+    const ctx = this.getAudioContext();
+    if (!ctx) return null;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const arrayBuffer = await response.arrayBuffer();
+      return await ctx.decodeAudioData(arrayBuffer);
+    } catch (err) {
+      console.warn('Failed to load/decode audio buffer:', url, err);
+      return null;
+    }
+  },
+
+  /**
+   * Play Railway Chime + Announcement Voice fused seamlessly together with 0ms gap.
+   * @param {string} announcementUrl
+   * @param {string} text
+   * @param {Object} nextData
+   * @returns {Promise<void>}
+   */
+  async playMergedAudio(announcementUrl, text, nextData) {
+    const ctx = this.getAudioContext();
+    const chimeEnabled = localStorage.getItem('cafe_play_chime') !== 'false';
+    const chimeUrl = window.location.origin + '/audio_clips/chime.mp3';
+
+    const queueText = document.getElementById('queueText');
+    if (queueText) {
+      queueText.textContent = `🔊 Playing: ${text}`;
+      queueText.classList.add('playing');
+    }
+
+    if (ctx) {
+      try {
+        let chimeBuffer = null;
+        if (chimeEnabled) {
+          if (!this.chimeBufferCache) {
+            this.chimeBufferCache = await this.loadAudioBuffer(chimeUrl);
+          }
+          chimeBuffer = this.chimeBufferCache;
+        }
+
+        const voiceBuffer = await this.loadAudioBuffer(announcementUrl);
+
+        if (voiceBuffer) {
+          return new Promise((resolve) => {
+            const now = ctx.currentTime;
+            let chimeDuration = 0;
+
+            if (chimeBuffer) {
+              const chimeSource = ctx.createBufferSource();
+              chimeSource.buffer = chimeBuffer;
+
+              const chimeGain = ctx.createGain();
+              chimeGain.gain.value = this.volume;
+
+              chimeSource.connect(chimeGain);
+              chimeGain.connect(ctx.destination);
+
+              chimeSource.start(now);
+              chimeDuration = chimeBuffer.duration;
+            }
+
+            const voiceSource = ctx.createBufferSource();
+            voiceSource.buffer = voiceBuffer;
+            voiceSource.playbackRate.value = this.speechRate;
+
+            const voiceGain = ctx.createGain();
+            voiceGain.gain.value = this.volume;
+
+            voiceSource.connect(voiceGain);
+            voiceGain.connect(ctx.destination);
+
+            // Micro-overlap (50ms) for a completely merged, continuous station announcement sound
+            const overlap = chimeDuration > 0.1 ? 0.05 : 0;
+            const voiceStartTime = now + (chimeDuration > 0 ? chimeDuration - overlap : 0);
+
+            voiceSource.start(voiceStartTime);
+
+            this.currentWebAudioSource = voiceSource;
+
+            voiceSource.onended = () => {
+              this.currentWebAudioSource = null;
+              if (queueText) {
+                queueText.textContent = 'Ready';
+                queueText.classList.remove('playing');
+              }
+              resolve();
+            };
+          });
+        }
+      } catch (err) {
+        console.warn('Web Audio API playback error, falling back to HTML5 audio:', err);
+      }
+    }
+
+    // Fallback: HTML5 Audio sequential chaining
+    return new Promise((resolve) => {
+      const playVoice = () => {
+        const audio = new Audio(announcementUrl);
+        audio.volume = this.volume;
+        audio.playbackRate = this.speechRate;
+        audio.preservesPitch = true;
+        this.currentAudio = audio;
+
+        audio.onended = () => {
+          this.currentAudio = null;
+          if (queueText) {
+            queueText.textContent = 'Ready';
+            queueText.classList.remove('playing');
+          }
+          resolve();
+        };
+
+        audio.onerror = () => {
+          this.currentAudio = null;
+          this.playWebSpeech(nextData);
+          setTimeout(resolve, 2000);
+        };
+
+        audio.play().catch(() => {
+          this.playWebSpeech(nextData);
+          setTimeout(resolve, 2000);
+        });
+      };
+
+      if (chimeEnabled) {
+        const chimeAudio = new Audio(chimeUrl);
+        chimeAudio.volume = this.volume;
+        chimeAudio.onended = playVoice;
+        chimeAudio.onerror = playVoice;
+        chimeAudio.play().catch(playVoice);
+      } else {
+        playVoice();
+      }
+    });
+  },
+
+  playQueue: [],
+  isPlayingQueue: false,
+
   /**
    * Enqueue a custom or local announcement object directly for playback.
    * @param {Object} data - { text, audioUrl, synthesis, audioConfig }
@@ -154,58 +313,19 @@ const AnnounceClient = {
 
     const nextData = this.playQueue.shift();
     try {
-      await new Promise((resolve) => {
-        const audioUrl = nextData.audioUrl || nextData.synthesis?.audioUrl;
-        if (audioUrl) {
-          let url = audioUrl;
-          if (url.startsWith('/audio_clips/')) {
-            // Local frontend static clip: keep relative to current origin
-            url = window.location.origin + url;
-          } else if (url.startsWith('/') && this.getBackendUrl()) {
-            url = `${this.getBackendUrl()}${url}`;
-          }
-
-          if (this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio = null;
-          }
-
-          const audio = new Audio(url);
-          audio.volume = nextData.audioConfig?.volume ?? this.volume;
-          audio.playbackRate = this.speechRate;
-          audio.preservesPitch = true;
-          this.currentAudio = audio;
-
-          const queueText = document.getElementById('queueText');
-          if (queueText) {
-            queueText.textContent = `🔊 Playing: ${nextData.text}`;
-            queueText.classList.add('playing');
-          }
-
-          audio.onended = () => {
-            this.currentAudio = null;
-            if (queueText) {
-              queueText.textContent = 'Ready';
-              queueText.classList.remove('playing');
-            }
-            resolve();
-          };
-
-          audio.onerror = () => {
-            this.currentAudio = null;
-            this.playWebSpeech(nextData);
-            setTimeout(resolve, 2000);
-          };
-
-          audio.play().catch(() => {
-            this.playWebSpeech(nextData);
-            setTimeout(resolve, 2000);
-          });
-        } else {
-          this.playWebSpeech(nextData);
-          setTimeout(resolve, 2500);
+      const audioUrl = nextData.audioUrl || nextData.synthesis?.audioUrl;
+      if (audioUrl) {
+        let url = audioUrl;
+        if (url.startsWith('/audio_clips/')) {
+          url = window.location.origin + url;
+        } else if (url.startsWith('/') && this.getBackendUrl()) {
+          url = `${this.getBackendUrl()}${url}`;
         }
-      });
+        await this.playMergedAudio(url, nextData.text, nextData);
+      } else {
+        this.playWebSpeech(nextData);
+        await new Promise(r => setTimeout(r, 2500));
+      }
     } catch {
       // Continue to next queued item
     } finally {
