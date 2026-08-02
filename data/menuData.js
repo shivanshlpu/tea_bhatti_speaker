@@ -55,7 +55,7 @@ window.MENU_DATA = {
     { "id": 38, "category_id": 9, "name_en": "Cold Coffee", "name_hi": "कोल्ड कॉफी", "name_bho": "कोल्ड कॉफी तैयार बा, ... एकदम ठंढा-ठंढा बा!", "price": 69, "image_url": "", "is_popular": true, "sort_order": 1 },
     { "id": 39, "category_id": 7, "name_en": "Bhel Puri", "name_hi": "भेल पूरी", "name_bho": "चटपटा भेल पूरी तैयार बा, ... जल्दी खाए आईं!", "price": 49, "image_url": "", "is_popular": true, "sort_order": 4 },
     { "id": 40, "category_id": 9, "name_en": "Hot Coffee", "name_hi": "गरम कॉफी", "name_bho": "गरम-गरम कॉफी तैयार बा, जल्दी ले जाईं!", "price": 49, "image_url": "", "is_popular": true, "sort_order": 2 },
-    { "id": 41, "category_id": 9, "name_en": "Special Tea", "name_hi": "स्पेशल चाय", "name_bho": "टी भट्टी स्पेशल चाय तैयार बा, चुस्की के मजा लीं!", "price": 25, "image_url": "", "is_popular": true, "sort_order": 3 }
+    { "id": 41, "category_id": 9, "name_en": "Tea / Garam Chai", "name_hi": "गरम चाय तैयार है", "name_bho": "गरम चाय तैयार बा!", "price": 25, "image_url": "", "is_popular": true, "sort_order": 3 }
   ],
   "version": 5
 };

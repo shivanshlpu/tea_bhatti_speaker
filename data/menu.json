@@ -499,9 +499,9 @@
     {
       "id": 41,
       "category_id": 9,
-      "name_en": "Special Tea",
-      "name_hi": "स्पेशल चाय",
-      "name_bho": "टी भट्टी स्पेशल चाय तैयार बा, चुस्की के मजा लीं!",
+      "name_en": "Tea / Garam Chai",
+      "name_hi": "गरम चाय तैयार है",
+      "name_bho": "गरम चाय तैयार बा!",
       "price": 25,
       "image_url": "",
       "is_popular": true,
