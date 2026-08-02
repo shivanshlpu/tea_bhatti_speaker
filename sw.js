@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tea-bhatti-v12';
+const CACHE_NAME = 'tea-bhatti-v13';
 
 // 1. Core App Shell (Cached instantly in <50ms during SW install)
 const CORE_STATIC_ASSETS = [
@@ -21,8 +21,9 @@ const CORE_STATIC_ASSETS = [
   '/images/logo.png'
 ];
 
-// 2. All 126 offline audio clips (Cached asynchronously in background post-activate)
+// 2. All 127 offline audio clips (Cached asynchronously in background post-activate)
 const AUDIO_CLIPS = [
+  '/audio_clips/chime.mp3',
   '/audio_clips/smoking_notice_en.mp3',
   '/audio_clips/smoking_notice_hi.mp3',
   '/audio_clips/smoking_notice_bho.mp3'
