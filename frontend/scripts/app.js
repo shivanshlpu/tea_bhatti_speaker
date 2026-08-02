@@ -22,8 +22,36 @@ const App = {
   /**
    * Boot the application.
    */
+  /**
+   * Update splash screen line-fill progress bar and status text.
+   * @param {number} percent - 0 to 100
+   * @param {string} [text]
+   */
+  setSplashProgress(percent, text) {
+    const bar = document.getElementById('splashProgressBar');
+    const statusText = document.getElementById('splashStatusText');
+    if (bar) bar.style.width = `${percent}%`;
+    if (statusText && text) statusText.textContent = text;
+  },
+
+  /**
+   * Smoothly hide the splash screen once loading completes.
+   */
+  hideSplashScreen() {
+    const splash = document.getElementById('appSplash');
+    if (!splash) return;
+    this.setSplashProgress(100, 'Ready!');
+    setTimeout(() => {
+      splash.classList.add('is-hidden');
+    }, 350);
+  },
+
+  /**
+   * Boot the application.
+   */
   async init() {
-    console.log('🚀 Cafe Voice System booting...');
+    console.log('🚀 Tea Bhatti Kiosk booting...');
+    this.setSplashProgress(15, 'Initializing Tea Bhatti Kiosk...');
 
     // Lock orientation to portrait mode
     if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
@@ -40,6 +68,8 @@ const App = {
     AnnounceClient.init();
     SettingsPanel.init();
     HistoryView.init();
+
+    this.setSplashProgress(35, 'Building interface components...');
 
     // 1. Render skeleton shimmer animation immediately
     this.renderSkeletonGrid();
@@ -72,14 +102,19 @@ const App = {
       });
     }
 
-    // 3. Yield to main thread briefly so browser paints the skeleton UI, then load data
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        this.loadCategories();
-      }, 50);
-    });
+    this.setSplashProgress(65, 'Loading menu & audio clips...');
 
-    console.log('✅ Cafe Voice System ready');
+    // 3. Load static menu data instantly
+    await this.loadCategories();
+
+    this.setSplashProgress(90, 'Preparing offline kiosk...');
+
+    // 4. Smoothly hide splash screen when ready
+    setTimeout(() => {
+      this.hideSplashScreen();
+    }, 300);
+
+    console.log('✅ Tea Bhatti Kiosk ready');
   },
 
   /**
