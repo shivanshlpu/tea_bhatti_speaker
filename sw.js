@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tea-bhatti-v13';
+const CACHE_NAME = 'tea-bhatti-v14';
 
 // 1. Core App Shell (Cached instantly in <50ms during SW install)
 const CORE_STATIC_ASSETS = [
