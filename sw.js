@@ -1,4 +1,20 @@
-const CACHE_NAME = 'tea-bhatti-v10';
+const CACHE_NAME = 'tea-bhatti-v11';
+
+// All 126 pre-recorded offline audio clips (Items 1-41 in EN, HI, BHO + Smoking Notice)
+const AUDIO_CLIPS = [
+  '/audio_clips/smoking_notice_en.mp3',
+  '/audio_clips/smoking_notice_hi.mp3',
+  '/audio_clips/smoking_notice_bho.mp3'
+];
+
+for (let i = 1; i <= 41; i++) {
+  AUDIO_CLIPS.push(`/audio_clips/item_${i}_en.mp3`);
+  AUDIO_CLIPS.push(`/audio_clips/item_${i}_hi.mp3`);
+  if (i !== 8) {
+    AUDIO_CLIPS.push(`/audio_clips/item_${i}_bho.mp3`);
+  }
+}
+
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -14,16 +30,25 @@ const STATIC_ASSETS = [
   '/scripts/settingsPanel.js',
   '/scripts/historyView.js',
   '/scripts/app.js',
+  '/scripts/pwaInstall.js',
   '/data/menu.json',
-  '/images/logo.png'
+  '/images/logo.png',
+  ...AUDIO_CLIPS
 ];
 
-// Install Event — Pre-cache core static assets
+// Install Event — Pre-cache core static assets & all audio clips for 100% offline usage
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('⚡ [SW] Pre-caching static kiosk assets...');
-      return cache.addAll(STATIC_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      console.log('⚡ [SW] Pre-caching static assets and all audio clips for offline PWA...');
+      // Cache assets safely (ignore individual fetch errors if any clip is missing)
+      for (const asset of STATIC_ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (err) {
+          console.warn('⚠️ [SW] Could not pre-cache asset:', asset);
+        }
+      }
     })
   );
   self.skipWaiting();
@@ -41,23 +66,24 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event — Stale-While-Revalidate caching strategy
+// Fetch Event — Cache-First for static assets & audio clips
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Cache static images, scripts & pre-recorded audio clips with SWR
+  // Cache-First strategy for images & pre-recorded audio clips
   if (url.pathname.startsWith('/menu_images') || url.pathname.startsWith('/images') || url.pathname.startsWith('/audio_clips') || event.request.destination === 'image' || event.request.destination === 'audio') {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) => {
         return cache.match(event.request).then((cachedResponse) => {
-          const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return fetch(event.request).then((networkResponse) => {
             if (networkResponse.status === 200) {
               cache.put(event.request, networkResponse.clone());
             }
             return networkResponse;
           }).catch(() => cachedResponse);
-
-          return cachedResponse || fetchPromise;
         });
       })
     );
@@ -77,3 +103,4 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
+

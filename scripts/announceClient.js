@@ -227,36 +227,56 @@ const AnnounceClient = {
    * @param {string} [priority='normal']
    * @returns {Promise<Object>}
    */
+  /**
+   * Announce an item by ID. Plays pre-recorded local MP3 clip instantly (0ms delay)
+   * without blocking network or database requests.
+   * @param {number} itemId
+   * @param {string} [languageCode]
+   * @param {string} [priority='normal']
+   * @returns {Promise<Object>}
+   */
   async announce(itemId, languageCode, priority = 'normal') {
-    const body = { itemId };
-    if (languageCode) body.languageCode = languageCode;
-    if (priority !== 'normal') body.priority = priority;
+    const activeLangBtn = document.querySelector('.lang-switch__btn.active');
+    const lang = languageCode || activeLangBtn?.dataset?.lang || localStorage.getItem('cafe_default_lang') || 'en';
 
-    try {
-      const response = await fetch(`${this.getBackendUrl()}/api/announce`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        this.enqueueAudio(result.data);
+    // Resolve item name from App state for clear display
+    let itemName = `Item ${itemId}`;
+    if (typeof App !== 'undefined' && App.allItems) {
+      const foundItem = App.allItems.find((i) => i.id == itemId);
+      if (foundItem) {
+        if (lang === 'hi') {
+          itemName = foundItem.name_hi || foundItem.name_en;
+        } else if (lang === 'bho') {
+          itemName = foundItem.name_bho || foundItem.name_hi || foundItem.name_en;
+        } else {
+          itemName = foundItem.name_en;
+        }
       }
-
-      return result;
-    } catch (err) {
-      console.warn('Backend announce API offline, falling back to local clip:', err);
-      const activeLangBtn = document.querySelector('.lang-switch__btn.active');
-      const lang = languageCode || activeLangBtn?.dataset?.lang || 'en';
-      const audioFile = `/audio_clips/item_${itemId}_${lang}.mp3`;
-      this.enqueue({
-        text: `Item ${itemId}`,
-        audioUrl: audioFile
-      });
-      return { success: true, fallback: true };
     }
+
+    // Determine target local audio clip
+    let audioFile = `/audio_clips/item_${itemId}_${lang}.mp3`;
+    if (itemId == 8 && lang === 'bho') {
+      audioFile = `/audio_clips/item_8_hi.mp3`;
+    }
+
+    // Enqueue for immediate local audio playback (0ms delay!)
+    this.enqueue({
+      text: itemName,
+      audioUrl: audioFile
+    });
+
+    // Save to local history
+    if (typeof HistoryView !== 'undefined' && HistoryView.addEntry) {
+      HistoryView.addEntry({
+        item_name: itemName,
+        language_code: lang,
+        timestamp: new Date().toISOString(),
+        status: 'played'
+      });
+    }
+
+    return { success: true, local: true };
   },
 
   /**
