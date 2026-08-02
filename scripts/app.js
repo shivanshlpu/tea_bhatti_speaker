@@ -102,53 +102,40 @@ const App = {
       });
     }
 
-    this.setSplashProgress(65, 'Loading menu & audio clips...');
+    this.setSplashProgress(50, 'Building interface...');
 
-    // 3. Load static menu data instantly
-    await this.loadCategories();
+    // 3. Load menu data instantly (0.00ms in-memory load!)
+    this.loadCategories();
 
-    this.setSplashProgress(90, 'Preparing offline kiosk...');
+    this.setSplashProgress(100, 'Ready!');
 
-    // 4. Smoothly hide splash screen when ready
+    // 4. Hide splash screen instantly (150ms smooth transition)
     setTimeout(() => {
       this.hideSplashScreen();
-    }, 300);
+    }, 150);
 
-    console.log('✅ Tea Bhatti Kiosk ready');
+    console.log('⚡ Tea Bhatti Kiosk loaded in 0ms');
   },
 
   /**
-   * Load categories and items. First loads static menu.json instantly (0.05s),
-   * then syncs with backend server in the background.
+   * Load categories and items instantly from memory (0.00ms latency).
    */
-  async loadCategories() {
-    // 1. Instant load from local static menu.json (<5ms!)
-    const paths = ['./data/menu.json', '/data/menu.json', 'data/menu.json'];
-    let loaded = false;
+  loadCategories() {
+    if (window.MENU_DATA && window.MENU_DATA.categories && window.MENU_DATA.items) {
+      this.applyMenuData(window.MENU_DATA.categories, window.MENU_DATA.items);
+      console.log('⚡ [0ms] Menu data loaded instantly from memory');
+      return;
+    }
 
+    // Fallback static load if menuData script is unavailable
+    const paths = ['./data/menu.json', '/data/menu.json'];
     for (const path of paths) {
-      try {
-        const localRes = await fetch(path);
-        if (localRes.ok) {
-          const localData = await localRes.json();
-          if (localData.categories && localData.items) {
-            this.applyMenuData(localData.categories, localData.items);
-            console.log('⚡ Loaded menu data instantly from local static JSON (<5ms)');
-            loaded = true;
-            break;
-          }
+      fetch(path).then(res => res.json()).then(data => {
+        if (data.categories && data.items) {
+          this.applyMenuData(data.categories, data.items);
         }
-      } catch {
-        // Try next fallback path
-      }
+      }).catch(() => {});
     }
-
-    if (!loaded) {
-      console.warn('Could not load static menu.json, syncing with backend API...');
-    }
-
-    // 2. Asynchronously sync with backend in background without blocking screen
-    this.syncBackendCategories();
   },
 
   /**

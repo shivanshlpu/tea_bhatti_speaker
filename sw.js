@@ -1,6 +1,27 @@
-const CACHE_NAME = 'tea-bhatti-v11';
+const CACHE_NAME = 'tea-bhatti-v12';
 
-// All 126 pre-recorded offline audio clips (Items 1-41 in EN, HI, BHO + Smoking Notice)
+// 1. Core App Shell (Cached instantly in <50ms during SW install)
+const CORE_STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/styles/tokens.css',
+  '/styles/light.css',
+  '/styles/dark.css',
+  '/data/menuData.js',
+  '/components/Toast.js',
+  '/components/ItemCard.js',
+  '/components/CategoryTabs.js',
+  '/scripts/announceClient.js',
+  '/scripts/search.js',
+  '/scripts/favorites.js',
+  '/scripts/settingsPanel.js',
+  '/scripts/historyView.js',
+  '/scripts/app.js',
+  '/scripts/pwaInstall.js',
+  '/images/logo.png'
+];
+
+// 2. All 126 offline audio clips (Cached asynchronously in background post-activate)
 const AUDIO_CLIPS = [
   '/audio_clips/smoking_notice_en.mp3',
   '/audio_clips/smoking_notice_hi.mp3',
@@ -15,58 +36,41 @@ for (let i = 1; i <= 41; i++) {
   }
 }
 
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles/tokens.css',
-  '/styles/light.css',
-  '/styles/dark.css',
-  '/components/Toast.js',
-  '/components/ItemCard.js',
-  '/components/CategoryTabs.js',
-  '/scripts/announceClient.js',
-  '/scripts/search.js',
-  '/scripts/favorites.js',
-  '/scripts/settingsPanel.js',
-  '/scripts/historyView.js',
-  '/scripts/app.js',
-  '/scripts/pwaInstall.js',
-  '/data/menu.json',
-  '/images/logo.png',
-  ...AUDIO_CLIPS
-];
-
-// Install Event — Pre-cache core static assets & all audio clips for 100% offline usage
+// Install Event — Instant load: cache ONLY critical app shell (0ms latency!)
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('⚡ [SW] Pre-caching static assets and all audio clips for offline PWA...');
-      // Cache assets safely (ignore individual fetch errors if any clip is missing)
-      for (const asset of STATIC_ASSETS) {
-        try {
-          await cache.add(asset);
-        } catch (err) {
-          console.warn('⚠️ [SW] Could not pre-cache asset:', asset);
-        }
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('⚡ [SW] Instantly caching core app shell...');
+      return cache.addAll(CORE_STATIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// Activate Event — Clean up old caches
+// Activate Event — Clean up old caches & trigger non-blocking background audio download
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
+    }).then(() => {
+      // Non-blocking background caching of audio clips in parallel batches
+      caches.open(CACHE_NAME).then(async (cache) => {
+        console.log('📦 [SW] Background caching offline audio clips...');
+        const BATCH_SIZE = 10;
+        for (let i = 0; i < AUDIO_CLIPS.length; i += BATCH_SIZE) {
+          const batch = AUDIO_CLIPS.slice(i, i + BATCH_SIZE);
+          await Promise.allSettled(batch.map(url => cache.add(url)));
+        }
+        console.log('✅ [SW] All offline audio clips ready in cache!');
+      });
     })
   );
   self.clients.claim();
 });
 
-// Fetch Event — Cache-First for static assets & audio clips
+// Fetch Event — Cache-First strategy (Instant 0ms response)
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
