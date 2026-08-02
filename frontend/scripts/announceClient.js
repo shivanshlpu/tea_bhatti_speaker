@@ -18,7 +18,7 @@ const AnnounceClient = {
   volume: 0.9,
 
   /** @type {number} Speech playback speed rate (0.5–1.5) */
-  speechRate: 0.85,
+  speechRate: 1.0,
 
   /** @type {number} Voice pitch (0.5–1.5) */
   speechPitch: 1.0,
@@ -210,7 +210,7 @@ const AnnounceClient = {
 
             const voiceSource = ctx.createBufferSource();
             voiceSource.buffer = voiceBuffer;
-            voiceSource.playbackRate.value = this.speechRate;
+            voiceSource.playbackRate.value = 1.0;
 
             const voiceGain = ctx.createGain();
             voiceGain.gain.value = this.volume;
@@ -246,7 +246,7 @@ const AnnounceClient = {
       const playVoice = () => {
         const audio = new Audio(announcementUrl);
         audio.volume = this.volume;
-        audio.playbackRate = this.speechRate;
+        audio.playbackRate = 1.0;
         audio.preservesPitch = true;
         this.currentAudio = audio;
 

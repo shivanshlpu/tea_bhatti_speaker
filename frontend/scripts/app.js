@@ -63,6 +63,7 @@ const App = {
     }
 
     // Initialize modules
+    localStorage.removeItem('cafe_favorites');
     Toast.init();
     Search.init();
     AnnounceClient.init();

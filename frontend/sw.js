@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tea-bhatti-v14';
+const CACHE_NAME = 'tea-bhatti-v15';
 
 // 1. Core App Shell (Cached instantly in <50ms during SW install)
 const CORE_STATIC_ASSETS = [
@@ -11,6 +11,7 @@ const CORE_STATIC_ASSETS = [
   '/components/Toast.js',
   '/components/ItemCard.js',
   '/components/CategoryTabs.js',
+  '/scripts/socket.io.min.js',
   '/scripts/announceClient.js',
   '/scripts/search.js',
   '/scripts/favorites.js',
@@ -20,22 +21,6 @@ const CORE_STATIC_ASSETS = [
   '/scripts/pwaInstall.js',
   '/images/logo.png'
 ];
-
-// 2. All 127 offline audio clips (Cached asynchronously in background post-activate)
-const AUDIO_CLIPS = [
-  '/audio_clips/chime.mp3',
-  '/audio_clips/smoking_notice_en.mp3',
-  '/audio_clips/smoking_notice_hi.mp3',
-  '/audio_clips/smoking_notice_bho.mp3'
-];
-
-for (let i = 1; i <= 41; i++) {
-  AUDIO_CLIPS.push(`/audio_clips/item_${i}_en.mp3`);
-  AUDIO_CLIPS.push(`/audio_clips/item_${i}_hi.mp3`);
-  if (i !== 8) {
-    AUDIO_CLIPS.push(`/audio_clips/item_${i}_bho.mp3`);
-  }
-}
 
 // Install Event — Instant load: cache ONLY critical app shell (0ms latency!)
 self.addEventListener('install', (event) => {
@@ -48,24 +33,13 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate Event — Clean up old caches & trigger non-blocking background audio download
+// Activate Event — Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
-    }).then(() => {
-      // Non-blocking background caching of audio clips in parallel batches
-      caches.open(CACHE_NAME).then(async (cache) => {
-        console.log('📦 [SW] Background caching offline audio clips...');
-        const BATCH_SIZE = 10;
-        for (let i = 0; i < AUDIO_CLIPS.length; i += BATCH_SIZE) {
-          const batch = AUDIO_CLIPS.slice(i, i + BATCH_SIZE);
-          await Promise.allSettled(batch.map(url => cache.add(url)));
-        }
-        console.log('✅ [SW] All offline audio clips ready in cache!');
-      });
     })
   );
   self.clients.claim();
