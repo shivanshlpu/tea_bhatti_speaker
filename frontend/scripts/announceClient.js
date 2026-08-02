@@ -39,11 +39,7 @@ const AnnounceClient = {
     const stored = localStorage.getItem('cafe_backend_url');
     if (stored) return stored.replace(/\/$/, '');
 
-    // Default to Render backend if hosted on Vercel or GitHub Pages
-    if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io')) {
-      return 'https://tea-bhatti-speaker.onrender.com';
-    }
-
+    // Pure local offline kiosk mode (no remote database delays)
     return '';
   },
 
